@@ -1,0 +1,6 @@
+stages:
+  - build
+  - package
+
+include:
+  - 'docker-credential-helpers/.gitlab-ci.yml'

@@ -1,0 +1,48 @@
+compile.dch:
+  stage: build
+  image: golang:1.14
+  variables:
+    VERSION: '0.6.3'
+  script:
+    - go get github.com/docker/docker-credential-helpers || true
+    - pushd /go/src/github.com/docker/docker-credential-helpers
+    - git checkout v${VERSION}
+    - make pass
+    - popd
+    - mv /go/src/github.com/docker/docker-credential-helpers/bin/docker-credential-pass docker-credential-pass
+  only:
+    changes:
+      - "docker-credential-helpers/*"
+  artifacts:
+    paths:
+      - docker-credential-pass
+
+rpm.dch:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'docker-credential-helpers'
+      VERSION: '0.6.3'
+    dependencies:
+      - compile.dch
+    only:
+      changes:
+        - "docker-credential-helpers/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'docker-credential-helpers is a suite of programs to use native stores to keep Docker credentials safe'
+        --rpm-summary 'docker-credential-helpers is a suite of programs to use native stores to keep Docker credentials safe'
+        --vendor morawskim
+        --license MIT
+        --url https://github.com/docker/docker-credential-helpers
+        docker-credential-pass=/usr/bin/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
