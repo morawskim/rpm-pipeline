@@ -1,0 +1,53 @@
+compile.docker-ls:
+  stage: build
+  image: golang:1.14
+  variables:
+    VERSION: '0.3.2'
+  script:
+    - go get github.com/mayflower/docker-ls || true
+    - pushd /go/src/github.com/mayflower/docker-ls
+    - git checkout v${VERSION}
+    - go generate github.com/mayflower/docker-ls/lib/...
+    - go build github.com/mayflower/docker-ls/cli/docker-ls
+    - go build github.com/mayflower/docker-ls/cli/docker-rm
+    - popd
+    - mkdir -p bin
+    - mv /go/src/github.com/mayflower/docker-ls/docker-* ./bin/
+  only:
+    changes:
+      - "docker-ls/*"
+  artifacts:
+    paths:
+      - ./bin/docker-ls
+      - ./bin/docker-rm
+
+rpm.docker-ls:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'docker-ls'
+      VERSION: '0.3.2'
+    dependencies:
+      - compile.docker-ls
+    only:
+      changes:
+        - "docker-ls/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'Docker-ls is a set of CLI tools for browsing and manipulating docker registries. In particular, docker-ls can handle authentication and display the sha256 content digests associated with tags.'
+        --rpm-summary 'docker-ls is a browser for docker registries'
+        --vendor morawskim
+        --license MIT
+        --url https://github.com/mayflower/docker-ls
+        ./bin/docker-ls=/usr/bin/
+        ./bin/docker-rm=/usr/bin/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
