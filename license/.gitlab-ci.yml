@@ -1,0 +1,50 @@
+variables:
+  LICENSE_VERSION: 5.0.0
+
+compile.license:
+  stage: build
+  image: golang:1.14
+  script:
+    - go get github.com/nishanths/license
+    - pushd /go/src/github.com/nishanths/license
+    - git checkout v${LICENSE_VERSION}
+    - go build .
+    - popd
+    - mkdir -p bin
+    - mv /go/src/github.com/nishanths/license/license ./bin/
+  only:
+    changes:
+      - "license/*"
+  artifacts:
+    paths:
+      - ./bin/license
+
+rpm.license:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'license'
+      VERSION: $LICENSE_VERSION
+    dependencies:
+      - compile.license
+    only:
+      changes:
+        - "license/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'license is a command line tool to create LICENSE files.'
+        --rpm-summary 'Generate license files'
+        --vendor morawskim
+        --license MIT
+        --url https://github.com/nishanths/license
+        ./bin/license=/usr/bin/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
