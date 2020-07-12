@@ -1,0 +1,56 @@
+variables:
+  CTOP_VERSION: 0.7.3
+
+compile.ctop:
+  stage: build
+  image: golang:1.14
+  script:
+    - go get github.com/bcicen/ctop || true
+    - pushd /go/src/github.com/bcicen/ctop
+    - git checkout v${CTOP_VERSION}
+    - make build
+    - popd
+    - mkdir -p ctop
+    - mv /go/src/github.com/bcicen/ctop/ctop ./ctop/
+    - cp -vr /go/src/github.com/bcicen/ctop/README.md ctop/README.md
+    - cp -vr /go/src/github.com/bcicen/ctop/LICENSE ctop/LICENSE
+    - cp -vr /go/src/github.com/bcicen/ctop/_docs ctop/
+  only:
+    changes:
+      - "ctop/*"
+  artifacts:
+    paths:
+      - ctop/
+
+rpm.ctop:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'ctop'
+      VERSION: $CTOP_VERSION
+    dependencies:
+      - compile.ctop
+    only:
+      changes:
+        - "ctop/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'ctop provides a concise and condensed overview of real-time metrics for multiple containers'
+        --rpm-summary 'Top-like interface for container metrics'
+        --vendor morawskim
+        --license MIT
+        --url https://github.com/bcicen/ctop
+        ./ctop/ctop=/usr/bin/
+        ./ctop/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
+        ./ctop/_docs=/usr/share/doc/packages/${PACKAGE_NAME}
+        ./ctop/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

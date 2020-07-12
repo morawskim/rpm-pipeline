@@ -7,3 +7,5 @@ Piplelines to build rpm packages.
 `docker-ls` - [docker-ls](https://github.com/mayflower/docker-ls) is a set of CLI tools for browsing and manipulating docker registries. In particular, docker-ls can handle authentication and display the sha256 content digests associated with tags.
 
 `license` - [license](https://github.com/nishanths/license) is a command line tool to create LICENSE files.
+
+`ctop` - [ctop](https://github.com/bcicen/ctop) Top-like interface for container metrics.
