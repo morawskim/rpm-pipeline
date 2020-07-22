@@ -9,3 +9,5 @@ Piplelines to build rpm packages.
 `license` - [license](https://github.com/nishanths/license) is a command line tool to create LICENSE files.
 
 `ctop` - [ctop](https://github.com/bcicen/ctop) Top-like interface for container metrics.
+
+`mkcert` - [mkcert](https://github.com/FiloSottile/mkcert) mkcert is a simple tool for making locally-trusted development certificates.

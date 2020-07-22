@@ -8,3 +8,5 @@ include:
   - 'docker-credential-helpers/.gitlab-ci.yml'
   - 'docker-ls/.gitlab-ci.yml'
   - 'license/.gitlab-ci.yml'
+  - 'mkcert/.gitlab-ci.yml'
+
