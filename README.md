@@ -11,3 +11,5 @@ Piplelines to build rpm packages.
 `ctop` - [ctop](https://github.com/bcicen/ctop) Top-like interface for container metrics.
 
 `mkcert` - [mkcert](https://github.com/FiloSottile/mkcert) mkcert is a simple tool for making locally-trusted development certificates.
+
+`hyperfine` - [hyperfine](https://github.com/sharkdp/hyperfine) A command-line benchmarking tool.

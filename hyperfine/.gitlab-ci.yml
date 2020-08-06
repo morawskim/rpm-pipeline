@@ -1,0 +1,54 @@
+variables:
+  HYPERFINE_VERSION: 1.10.0
+
+compile.hyperfine:
+  stage: build
+  image: rust:1.44
+  script:
+    - wget -Ohyperfine.tar.gz https://github.com/sharkdp/hyperfine/archive/v${HYPERFINE_VERSION}.tar.gz
+    - tar xvzf hyperfine.tar.gz
+    - cd hyperfine-${HYPERFINE_VERSION}
+    - cargo build --release
+  only:
+    changes:
+      - "hyperfine/*"
+  artifacts:
+    paths:
+      - hyperfine-${HYPERFINE_VERSION}/target/release/hyperfine
+      - hyperfine-${HYPERFINE_VERSION}/CHANGELOG.md
+      - hyperfine-${HYPERFINE_VERSION}/LICENSE-APACHE
+      - hyperfine-${HYPERFINE_VERSION}/LICENSE-MIT
+      - hyperfine-${HYPERFINE_VERSION}/doc/hyperfine.1
+
+rpm.hyperfine:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'hyperfine'
+      VERSION: $HYPERFINE_VERSION
+    dependencies:
+      - compile.hyperfine
+    only:
+      changes:
+        - "hyperfine/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'A command-line benchmarking tool'
+        --rpm-summary 'A command-line benchmarking tool'
+        --vendor morawskim
+        --license 'MIT+Apache License 2.0'
+        --url https://github.com/sharkdp/hyperfine
+        hyperfine-${VERSION}/target/release/hyperfine=/usr/bin/
+        hyperfine-${VERSION}/CHANGELOG.md=/usr/share/doc/packages/${PACKAGE_NAME}/CHANGELOG.md
+        hyperfine-${VERSION}/LICENSE-APACHE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE-APACHE
+        hyperfine-${VERSION}/LICENSE-MIT=/usr/share/licenses/${PACKAGE_NAME}/LICENSE-MIT
+        hyperfine-${VERSION}/doc/hyperfine.1=/usr/share/man/man1/${PACKAGE_NAME}.1
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
