@@ -1,0 +1,59 @@
+variables:
+  YADM_VERSION: 1.10.0
+
+compile.yadm:
+  stage: build
+  image: rust:1.44
+  script:
+    - wget -Oyadm.tar.gz https://github.com/TheLocehiliosan/yadm/archive/${YADM_VERSION}.tar.gz
+    - tar xvzf yadm.tar.gz
+    - cd yadm-${YADM_VERSION}
+    - mkdir -p docs
+    - cp -vr README.md yadm.md CHANGES ./docs
+  only:
+    changes:
+      - "yadm/*"
+  artifacts:
+    paths:
+      - yadm-${YADM_VERSION}/completion/yadm.bash_completion
+      - yadm-${YADM_VERSION}/yadm.1
+      - yadm-${YADM_VERSION}/docs
+      - yadm-${YADM_VERSION}/LICENSE
+      - yadm-${YADM_VERSION}/yadm
+
+rpm.yadm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'yadm'
+      VERSION: $YADM_VERSION
+    dependencies:
+      - compile.yadm
+    only:
+      changes:
+        - "yadm/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'yadm is a dotfile management tool with 3 main features: Manages files across systems using a single Git repository. Provides a way to use alternate files on a specific OS or host. Supplies a method of encrypting confidential data so it can safely be stored in your repository'
+        --rpm-summary 'Yet Another Dotfiles Manager'
+        --vendor morawskim
+        --license 'GPLv3'
+        --url https://github.com/TheLocehiliosan/yadm
+        -a all
+        --depends git
+        --depends bash
+        ./yadm-${YADM_VERSION}/yadm=/usr/bin/
+        ./yadm-${YADM_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+        ./yadm-${YADM_VERSION}/yadm.1=/usr/share/man/man1/${PACKAGE_NAME}.1
+        ./yadm-${YADM_VERSION}/completion/yadm.bash_completion=/etc/bash_completion.d/${PACKAGE_NAME}
+        ./yadm-${YADM_VERSION}/docs=/usr/share/doc/packages/${PACKAGE_NAME}
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm

@@ -10,4 +10,4 @@ include:
   - 'hyperfine/.gitlab-ci.yml'
   - 'license/.gitlab-ci.yml'
   - 'mkcert/.gitlab-ci.yml'
-
+  - 'yadm/.gitlab-ci.yml'

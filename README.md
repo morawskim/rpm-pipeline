@@ -13,3 +13,5 @@ Piplelines to build rpm packages.
 `mkcert` - [mkcert](https://github.com/FiloSottile/mkcert) mkcert is a simple tool for making locally-trusted development certificates.
 
 `hyperfine` - [hyperfine](https://github.com/sharkdp/hyperfine) A command-line benchmarking tool.
+
+`yadm` - [yadm](https://github.com/TheLocehiliosan/yadm) Yet Another Dotfiles Manager.
