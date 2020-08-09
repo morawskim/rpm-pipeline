@@ -15,3 +15,5 @@ Piplelines to build rpm packages.
 `hyperfine` - [hyperfine](https://github.com/sharkdp/hyperfine) A command-line benchmarking tool.
 
 `yadm` - [yadm](https://github.com/TheLocehiliosan/yadm) Yet Another Dotfiles Manager.
+
+`ngrok` - [ngrok](https://ngrok.com) Secure tunnels to localhost.

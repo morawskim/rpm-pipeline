@@ -1,0 +1,47 @@
+variables:
+  NGROK_VERSION: 2.3.35
+
+compile.ngrok:
+  stage: build
+  image: rust:1.44
+  script:
+    - mkdir -p ngrok-bin
+    - wget -Ongrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+    - unzip -d ngrok-bin ngrok.zip
+  only:
+    changes:
+      - "ngrok/*"
+  artifacts:
+    paths:
+      - ngrok-bin/ngrok
+
+rpm.ngrok:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'ngrok-client'
+      VERSION: $NGROK_VERSION
+    dependencies:
+      - compile.ngrok
+    only:
+      changes:
+        - "ngrok/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'ngrok creates a tunnel from the public internet to a port on your local machine. You can give this URL to anyone to allow them to try out a web site you are developing without doing any deployment. It captures all traffic through the tunnel. It displays information about the HTTP traffic for your inspection. Raw request/response bytes, parsed headers and form data, JSON/XML syntax checking and more are included. It can also replay requests. By default, ngrok will use ngrok.com as a third-party relay. This service is provided at no-cost and without registration but it is possible to get additional features by signing up in the service (which is pay-as-you-want kind). However, it is possible to setup and use its own server. This package installs the client part of ngrok. It can be used directly with ngrok.com service or with your own server if you install the ngrok-server package.'
+        --rpm-summary 'Secure tunnels to localhost'
+        --provides ngrok
+        --vendor morawskim
+        --license 'Commercial'
+        --url https://ngrok.com
+        ./ngrok-bin/ngrok=/usr/bin/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
