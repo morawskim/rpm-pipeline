@@ -19,3 +19,5 @@ Piplelines to build rpm packages.
 `ngrok` - [ngrok](https://ngrok.com) Secure tunnels to localhost.
 
 `bcal` - [bcal](https://github.com/jarun/bcal) Byte CALculator. The engineer's utility for storage conversions and calculations.
+
+`netsed` - [netsed](http://silicone.homelinux.org/projects/netsed/) A tool to modify network packets.
