@@ -1,0 +1,56 @@
+variables:
+  BCAL_VERSION: '1.6'
+
+compile.bcal:
+  stage: build
+  image: gcc:8.4.0
+  script:
+    - wget -Obcal.tar.gz https://github.com/jarun/bcal/archive/v${BCAL_VERSION}.tar.gz
+    - tar xvzf bcal.tar.gz
+    - cd bcal-${BCAL_VERSION}
+    - mkdir -p docs
+    - cp -vr CHANGELOG README.md ./docs
+    - make
+  only:
+    changes:
+      - "bcal/*"
+  artifacts:
+    paths:
+      - bcal-${BCAL_VERSION}/bcal.1
+      - bcal-${BCAL_VERSION}/docs
+      - bcal-${BCAL_VERSION}/LICENSE
+      - bcal-${BCAL_VERSION}/bcal
+
+rpm.bcal:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'bcal'
+      VERSION: $BCAL_VERSION
+    dependencies:
+      - compile.bcal
+    only:
+      changes:
+        - "bcal/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description "bcal (Byte CALculator) is a command-line utility for storage conversions and calculations. Storage, hardware and firmware developers work with numerical calculations regularly e.g., storage unit conversions, address calculations etc. If you are one and can't calculate the hex address offset for (512 - 16) MiB immediately, or the value when the 43rd bit of a 64-bit address is set, bcal is for you. Though it started with storage, the scope of bcal isn't limited to the storage domain. Feel free to raise PRs to simplify other domain-specific numerical calculations so it can evolve into an engineer's tool. bcal follows Ubuntu's standard unit conversion and notation policy."
+        --rpm-summary "Byte CALculator. The engineer's utility for storage conversions and calculations."
+        --vendor morawskim
+        --license 'GPLv3'
+        --url https://github.com/jarun/bcal
+        --depends git
+        --depends bash
+        ./bcal-${BCAL_VERSION}/bcal=/usr/bin/
+        ./bcal-${BCAL_VERSION}/bcal.1=/usr/share/man/man1/${PACKAGE_NAME}.1
+        ./bcal-${BCAL_VERSION}/docs=/usr/share/doc/packages/${PACKAGE_NAME}
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

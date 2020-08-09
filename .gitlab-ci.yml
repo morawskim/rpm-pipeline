@@ -3,6 +3,7 @@ stages:
   - package
 
 include:
+  - 'bcal/.gitlab-ci.yml'
   - 'ctop/.gitlab-ci.yml'
   - 'delta/.gitlab-ci.yml'
   - 'docker-credential-helpers/.gitlab-ci.yml'
