@@ -23,3 +23,5 @@ Piplelines to build rpm packages.
 `netsed` - [netsed](http://silicone.homelinux.org/projects/netsed/) A tool to modify network packets.
 
 `json-tools` - [json-tools](https://github.com/larsks/json-tools) This is a small set of utilities for interacting with JSON on the command line.
+
+`journalcheck` - [journalcheck](https://github.com/jorgenschaefer/journalcheck) Like logcheck, but for journald.

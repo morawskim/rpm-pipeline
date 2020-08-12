@@ -1,0 +1,60 @@
+variables:
+  JOURNALCHECK_VERSION: '20161208'
+  JOURNALCHECK_COMMIT: '84b758bc9a77c4a244d768b4e9c8bcb968273b6a'
+
+compile.journalcheck:
+  stage: build
+  image: golang:1.14
+  script:
+    - apt-get -y update
+    - apt-get -y install libsystemd-dev
+    - go get github.com/jorgenschaefer/journalcheck
+    - go get github.com/coreos/go-systemd/sdjournal
+    - pushd /go/src/github.com/jorgenschaefer/journalcheck
+    - git checkout ${JOURNALCHECK_COMMIT}
+    - go build -o journalcheck .
+    - popd
+    - mkdir -p journalcheck
+    - mv /go/src/github.com/jorgenschaefer/journalcheck/journalcheck ./journalcheck/
+    - cp -vr /go/src/github.com/jorgenschaefer/journalcheck/LICENSE ./journalcheck/
+    - cp -vr /go/src/github.com/jorgenschaefer/journalcheck/README.md ./journalcheck/
+    - cp -vr /go/src/github.com/jorgenschaefer/journalcheck/example ./journalcheck/
+  only:
+    changes:
+      - "journalcheck/*"
+  artifacts:
+    paths:
+      - journalcheck/
+
+rpm.journalcheck:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'journalcheck'
+      VERSION: $JOURNALCHECK_VERSION
+    dependencies:
+      - compile.journalcheck
+    only:
+      changes:
+        - "journalcheck/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'Journalcheck is a simple utility which sends mails of possibly interesting journal entries to a configurable e-mail address. Journal entries are marked as not interesting by matching a regular expression, a list of which can be provided in a file, one per line. This is very similar in operation to logcheck, except it operates on the journal instead of plain text log files.'
+        --rpm-summary 'Like logcheck, but for journald'
+        --vendor morawskim
+        --license 'GPL-3'
+        --url https://github.com/jorgenschaefer/journalcheck
+        ./journalcheck/journalcheck=/usr/bin/
+        ./journalcheck/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
+        ./journalcheck/example=/usr/share/doc/packages/${PACKAGE_NAME}/
+        ./journalcheck/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
