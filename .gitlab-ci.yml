@@ -9,6 +9,7 @@ include:
   - 'docker-credential-helpers/.gitlab-ci.yml'
   - 'docker-ls/.gitlab-ci.yml'
   - 'hyperfine/.gitlab-ci.yml'
+  - 'json-tools/.gitlab-ci.yml'
   - 'license/.gitlab-ci.yml'
   - 'mkcert/.gitlab-ci.yml'
   - 'netsed/.gitlab-ci.yml'

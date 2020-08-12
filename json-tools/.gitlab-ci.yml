@@ -1,0 +1,53 @@
+variables:
+  JSON_TOOLS_VERSION: '20131118'
+  JSON_TOOLS_COMMIT: df1456e88cc5ee457e64f86f5f61ed458488de89
+
+compile.json-tools:
+  stage: build
+  image: rust:1.44
+  script:
+    - wget -Ojson-tools.tar.gz https://github.com/larsks/json-tools/archive/${JSON_TOOLS_COMMIT}.tar.gz
+    - tar xvzf json-tools.tar.gz
+  only:
+    changes:
+      - "json-tools/*"
+  artifacts:
+    paths:
+      - json-tools-${JSON_TOOLS_COMMIT}/README.md
+      - json-tools-${JSON_TOOLS_COMMIT}/jsong
+      - json-tools-${JSON_TOOLS_COMMIT}/jsonx
+
+rpm.json-tools:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'json-tools'
+      VERSION: $JSON_TOOLS_VERSION
+    dependencies:
+      - compile.json-tools
+    only:
+      changes:
+        - "json-tools/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'This is a small set of utilities for interacting with JSON on the command line. I find it particularly useful for working with JSON-enabled REST APIs -- such as those used by OpenStack -- on the command line.'
+        --rpm-summary 'JSON Utilities'
+        --vendor morawskim
+        --url https://github.com/larsks/json-tools
+        -a all
+        --depends python-dpath
+        --provides jsong
+        --provides jsonx
+        ./json-tools-${JSON_TOOLS_COMMIT}/jsong=/usr/bin/
+        ./json-tools-${JSON_TOOLS_COMMIT}/jsonx=/usr/bin/
+        ./json-tools-${JSON_TOOLS_COMMIT}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm
