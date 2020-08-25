@@ -1,0 +1,53 @@
+variables:
+  GIT_QUICK_STATS_VERSION: 2.0.9
+
+compile.git-quick-stats:
+  stage: build
+  image: rust:1.44
+  script:
+    - wget -Ogit.tar.gz https://github.com/arzzen/git-quick-stats/archive/${GIT_QUICK_STATS_VERSION}.tar.gz
+    - tar xzvf git.tar.gz
+    - cd git-quick-stats-${GIT_QUICK_STATS_VERSION}
+  only:
+    changes:
+      - "git-quick-stats/*"
+  artifacts:
+    paths:
+      - git-quick-stats-${GIT_QUICK_STATS_VERSION}/git-quick-stats
+      - git-quick-stats-${GIT_QUICK_STATS_VERSION}/git-quick-stats.1
+      - git-quick-stats-${GIT_QUICK_STATS_VERSION}/LICENSE
+      - git-quick-stats-${GIT_QUICK_STATS_VERSION}/README.md
+rpm.git-quick-stats:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'git-quick-stats'
+      VERSION: $GIT_QUICK_STATS_VERSION
+    dependencies:
+      - compile.git-quick-stats
+    only:
+      changes:
+        - "git-quick-stats/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'git-quick-stats is a simple and efficient way to access various statistics in git repository. Any git repository contains tons of information about commits, contributors, and files. Extracting this information is not always trivial, mostly because of a gadzillion options to a gadzillion git commands – I don’t think there is a single person alive who knows them all. Probably not even Linus Torvalds himself :).'
+        --rpm-summary 'Git quick statistics is a simple and efficient way to access various statistics in git repository'
+        --vendor morawskim
+        --license 'MIT'
+        -a all
+        --depends git
+        --url https://github.com/arzzen/git-quick-stats
+        ./git-quick-stats-${GIT_QUICK_STATS_VERSION}/git-quick-stats=/usr/bin/
+        ./git-quick-stats-${GIT_QUICK_STATS_VERSION}/git-quick-stats.1=/usr/share/man/man1/${PACKAGE_NAME}.1
+        ./git-quick-stats-${GIT_QUICK_STATS_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+        ./git-quick-stats-${GIT_QUICK_STATS_VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm
