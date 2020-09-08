@@ -15,6 +15,7 @@ compile.textql:
     - mv /go/src/github.com/dinedal/textql/build/textql ./textql/
     - cp -vr /go/src/github.com/dinedal/textql/LICENSE ./textql/
     - cp -vr /go/src/github.com/dinedal/textql/Readme.md ./textql/
+    - cp -vr /go/src/github.com/dinedal/textql/man/textql.1 ./textql/
   only:
     changes:
       - "textql/*"
@@ -50,6 +51,7 @@ rpm.textql:
         ./textql/textql=/usr/bin/
         ./textql/Readme.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
         ./textql/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+        ./textql/textql.1=/usr/share/man/man1/textql.1
     artifacts:
       paths:
         - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
