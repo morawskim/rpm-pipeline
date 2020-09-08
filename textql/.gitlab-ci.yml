@@ -1,0 +1,55 @@
+variables:
+  TEXTQL_VERSION: '2.0.3.20200608'
+
+compile.textql:
+  stage: build
+  image: golang:1.14
+  script:
+    - go get -u github.com/dinedal/textql/...
+    - pushd /go/src/github.com/dinedal/textql
+    - git checkout 250cf763f52c2045148f7447d88688e0555b1227
+    - go build -ldflags "-X main.VERSION=`cat VERSION` -s" -o ./build/textql ./textql/main.go
+    - mkdir -p textql
+    - popd
+    - mkdir -p textql
+    - mv /go/src/github.com/dinedal/textql/build/textql ./textql/
+    - cp -vr /go/src/github.com/dinedal/textql/LICENSE ./textql/
+    - cp -vr /go/src/github.com/dinedal/textql/Readme.md ./textql/
+  only:
+    changes:
+      - "textql/*"
+  artifacts:
+    paths:
+      - textql/
+
+rpm.textql:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'textql'
+      VERSION: $TEXTQL_VERSION
+    dependencies:
+      - compile.textql
+    only:
+      changes:
+        - "textql/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'Allows you to easily execute SQL against structured text like CSV or TSV.'
+        --rpm-summary 'Allows you to easily execute SQL against structured text like CSV or TSV.'
+        --vendor morawskim
+        --license 'MIT'
+        --url https://github.com/dinedal/textql
+        ./textql/textql=/usr/bin/
+        ./textql/Readme.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
+        ./textql/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

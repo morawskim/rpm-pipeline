@@ -16,4 +16,5 @@ include:
   - 'mkcert/.gitlab-ci.yml'
   - 'netsed/.gitlab-ci.yml'
   - 'ngrok/.gitlab-ci.yml'
+  - 'textql/.gitlab-ci.yml'
   - 'yadm/.gitlab-ci.yml'

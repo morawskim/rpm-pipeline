@@ -27,3 +27,5 @@ Piplelines to build rpm packages.
 `journalcheck` - [journalcheck](https://github.com/jorgenschaefer/journalcheck) Like logcheck, but for journald.
 
 `git-quick-stats` - [git-quick-stats](https://github.com/arzzen/git-quick-stats) Git quick statistics is a simple and efficient way to access various statistics in git repository.
+
+`textql` - [textql](https://github.com/dinedal/textql) Allows you to easily execute SQL against structured text like CSV or TSV.
