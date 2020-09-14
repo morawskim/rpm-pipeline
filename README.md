@@ -29,3 +29,5 @@ Piplelines to build rpm packages.
 `git-quick-stats` - [git-quick-stats](https://github.com/arzzen/git-quick-stats) Git quick statistics is a simple and efficient way to access various statistics in git repository.
 
 `textql` - [textql](https://github.com/dinedal/textql) Allows you to easily execute SQL against structured text like CSV or TSV.
+
+`yum-scripts`- [yum-scripts](http://linux.duke.edu/yum/download/yum-utils/) Utilities based around the yum package manager.

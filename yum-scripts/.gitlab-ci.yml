@@ -1,0 +1,69 @@
+variables:
+  YUM_SCRIPT_VERSION: 1.1.13
+
+compile.yum-scripts:
+  stage: build
+  image: python:3.7
+  script:
+    - wget -Oyum-scripts.tar.gz https://github.com/henrysher/yum-utils/archive/yum-utils-${YUM_SCRIPT_VERSION}.tar.gz
+    - tar xvzf yum-scripts.tar.gz
+    - cd yum-utils-yum-utils-${YUM_SCRIPT_VERSION}
+    - patch -p0  -s < ../yum-scripts/yum-utils-1.1.6.patch
+    - patch -p0  -s < ../yum-scripts/yum-utils-1.1.6-changelog.patch
+    - patch -p0  -s < ../yum-scripts/yum-utils-1.1.10.patch
+    - mkdir -p yum-scripts-build-root
+    - BUILD_DIR=yum-scripts-build-root
+    - make DESTDIR=$BUILD_DIR install
+    - mkdir -p $BUILD_DIR/usr/share/doc/packages/yum-utils
+    - cp README $BUILD_DIR/usr/share/doc/packages/yum-utils/
+    - rm $BUILD_DIR/usr/share/man/man8/yum-security.8
+    - >
+      rm -v $BUILD_DIR/usr/bin/yum-builddep \
+        $BUILD_DIR/usr/bin/yumdownloader \
+        $BUILD_DIR/usr/sbin/yum-complete-transaction \
+        $BUILD_DIR/usr/share/man/man1/yum-builddep.1 \
+        $BUILD_DIR/usr/share/man/man1/yum-changelog.1 \
+        $BUILD_DIR/usr/share/man/man1/yum-filter-data.1 \
+        $BUILD_DIR/usr/share/man/man1/yum-list-data.1 \
+        $BUILD_DIR/usr/share/man/man1/yum-verify.1 \
+        $BUILD_DIR/usr/share/man/man1/yumdownloader.1 \
+        $BUILD_DIR/usr/share/man/man5/yum-changelog.conf.5 \
+        $BUILD_DIR/usr/share/man/man8/yum-complete-transaction.8
+  only:
+    changes:
+      - "yum-scripts/*"
+  artifacts:
+    paths:
+      - yum-utils-yum-utils-${YUM_SCRIPT_VERSION}/yum-scripts-build-root
+
+rpm.yum-scripts:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'yum-scripts'
+      VERSION: $YUM_SCRIPT_VERSION
+    dependencies:
+      - compile.yum-scripts
+    only:
+      changes:
+        - "yum-scripts/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'yum-utils is a collection of utilities and examples for the yum package manager. It includes utilities by different authors that make yum easier and more powerful to use. Authors: --------     Gijs Hollestelle <gijs@gewis.nl>     Seth Vidal <skvidal@phy.duke.edu>     Panu Matilainen <pmatilai@laiskiainen.org>     Sean Dilda <sean@duke.edu>'
+        --rpm-summary 'Utilities based around the yum package manager'
+        --vendor morawskim
+        --license 'GPL-2.0+'
+        --url http://linux.duke.edu/yum/download/yum-utils/
+        -a all
+        --conflicts yum-utils
+        ./yum-utils-yum-utils-${YUM_SCRIPT_VERSION}/yum-scripts-build-root=/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm
