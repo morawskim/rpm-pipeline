@@ -17,5 +17,6 @@ include:
   - 'netsed/.gitlab-ci.yml'
   - 'ngrok/.gitlab-ci.yml'
   - 'textql/.gitlab-ci.yml'
+  - 'tmpmail/.gitlab-ci.yml'
   - 'yadm/.gitlab-ci.yml'
   - 'yum-scripts/.gitlab-ci.yml'

@@ -31,3 +31,5 @@ Piplelines to build rpm packages.
 `textql` - [textql](https://github.com/dinedal/textql) Allows you to easily execute SQL against structured text like CSV or TSV.
 
 `yum-scripts`- [yum-scripts](http://linux.duke.edu/yum/download/yum-utils/) Utilities based around the yum package manager.
+
+`tmpmail` - [tmpmail](https://github.com/sdushantha/tmpmail) A temporary email right from your terminal.

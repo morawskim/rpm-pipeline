@@ -1,0 +1,53 @@
+compile.tmpmail:
+  stage: build
+  image: rust:1.44
+  script:
+    - wget -Otmpmail.tar.gz https://github.com/sdushantha/tmpmail/archive/master.tar.gz
+    - tar xzvf tmpmail.tar.gz
+    - cd tmpmail-master
+    - chmod a+x tmpmail
+  only:
+    changes:
+      - "tmpmail/*"
+  artifacts:
+    paths:
+      - tmpmail-master/LICENSE
+      - tmpmail-master/README.md
+      - tmpmail-master/tmpmail
+
+rpm.tmpmail:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'tmpmail'
+    dependencies:
+      - compile.tmpmail
+    only:
+      changes:
+        - "tmpmail/*"
+    script:
+      - VERSION=$(grep 'VERSION=' ./tmpmail-master/tmpmail | grep -P -o '([\d]+\.[\d]+\.[\d]+)')
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'tmpmail is a command line utility that allows you to create a temporary email address and receive emails to the temporary email address. It uses 1secmail API to receive the emails.'
+        --rpm-summary 'A temporary email right from your terminal'
+        --vendor morawskim
+        --license 'MIT'
+        --url https://github.com/sdushantha/tmpmail
+        -a all
+        --depends w3m
+        --depends curl
+        --depends jq
+        --depends awk
+        ./tmpmail-master/tmpmail=/usr/bin/
+        ./tmpmail-master/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+        ./tmpmail-master/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-*.rpm
