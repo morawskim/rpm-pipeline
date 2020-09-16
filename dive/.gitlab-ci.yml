@@ -1,0 +1,53 @@
+variables:
+  DIVE_VERSION: '0.9.2'
+
+compile.dive:
+  stage: build
+  image: golang:1.14
+  script:
+    - go get -u github.com/wagoodman/dive
+    - pushd /go/src/github.com/wagoodman/dive
+    - git checkout v${DIVE_VERSION}
+    - make build
+    - popd
+    - mkdir -p dive-${DIVE_VERSION}
+    - mv /go/src/github.com/wagoodman/dive/dist/dive_linux_amd64/dive dive-${DIVE_VERSION}/dive
+    - cp /go/src/github.com/wagoodman/dive/LICENSE /go/src/github.com/wagoodman/dive/README.md dive-${DIVE_VERSION}
+  only:
+    changes:
+      - "dive/*"
+  artifacts:
+    paths:
+      - dive-${DIVE_VERSION}/
+
+rpm.dive:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'dive'
+      VERSION: $DIVE_VERSION
+    dependencies:
+      - compile.dive
+    only:
+      changes:
+        - "dive/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'A tool for exploring a docker image, layer contents, and discovering ways to shrink the size of your Docker/OCI image.'
+        --rpm-summary 'A tool for exploring a docker image, layer contents, and discovering ways to shrink the size of your Docker/OCI image.'
+        --vendor morawskim
+        --license 'MIT'
+        --url https://github.com/wagoodman/dive
+        ./dive-${DIVE_VERSION}/dive=/usr/bin/
+        ./dive-${DIVE_VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
+        ./dive-${DIVE_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-*.x86_64.rpm

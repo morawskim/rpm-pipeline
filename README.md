@@ -33,3 +33,5 @@ Piplelines to build rpm packages.
 `yum-scripts`- [yum-scripts](http://linux.duke.edu/yum/download/yum-utils/) Utilities based around the yum package manager.
 
 `tmpmail` - [tmpmail](https://github.com/sdushantha/tmpmail) A temporary email right from your terminal.
+
+`dive` - [dive](https://github.com/wagoodman/dive) A tool for exploring a docker image, layer contents, and discovering ways to shrink the size of your Docker/OCI image.

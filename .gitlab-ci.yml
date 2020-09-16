@@ -6,6 +6,7 @@ include:
   - 'bcal/.gitlab-ci.yml'
   - 'ctop/.gitlab-ci.yml'
   - 'delta/.gitlab-ci.yml'
+  - 'dive/.gitlab-ci.yml'
   - 'docker-credential-helpers/.gitlab-ci.yml'
   - 'docker-ls/.gitlab-ci.yml'
   - 'git-quick-stats/.gitlab-ci.yml'
