@@ -1,0 +1,53 @@
+variables:
+  XRECTSEL_VERSION: '0.1.0'
+  XRECTSEL_COMMIT: 3f38859ddd88dbc2bb2c5268f80bd04fe1467cc8
+
+compile.xrectsel:
+  stage: build
+  image: gcc:8.4.0
+  script:
+    - wget -Oxrectsel.tar.gz https://github.com/morawskim/xrectsel/archive/${XRECTSEL_COMMIT}.tar.gz
+    - tar xvzf xrectsel.tar.gz
+    - mkdir xrectsel-${XRECTSEL_VERSION}
+    - pushd xrectsel-${XRECTSEL_COMMIT}
+    - make
+    - make install DESTDIR=../xrectsel-${XRECTSEL_VERSION}
+    - cp README.md ../xrectsel-${XRECTSEL_VERSION}
+  only:
+    changes:
+      - "xrectsel/*"
+  artifacts:
+    paths:
+      - xrectsel-${XRECTSEL_VERSION}
+
+rpm.xrectsel:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'xrectsel'
+      VERSION: $XRECTSEL_VERSION
+    dependencies:
+      - compile.xrectsel
+    only:
+      changes:
+        - "xrectsel/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description "Select a screen area with mouse and return the geometry of this area"
+        --rpm-summary "Select a screen area with mouse and return the geometry of this area"
+        --vendor morawskim
+        --license 'BSD'
+        --url https://bbs.archlinux.org/viewtopic.php?id=85378
+        --depends libX11-6
+        ./xrectsel-${XRECTSEL_VERSION}/usr/bin/xrectsel=/usr/bin/
+        ./xrectsel-${XRECTSEL_VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
