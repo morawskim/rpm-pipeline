@@ -1,0 +1,52 @@
+compile.duf:
+  stage: build
+  image: golang:1.14
+  variables:
+    VERSION: '0.3.1'
+  script:
+    - go get github.com/muesli/duf
+    - mkdir -p artefacts
+    - pushd /go/src/github.com/muesli/duf
+    - git checkout v${VERSION}
+    - go build
+    - popd
+    - cp /go/src/github.com/muesli/duf/README.md /go/src/github.com/muesli/duf/LICENSE artefacts
+    - mv /go/src/github.com/muesli/duf/duf artefacts/
+  only:
+    changes:
+      - "duf/*"
+  artifacts:
+    paths:
+      - ./artefacts/
+
+rpm.duf:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'duf'
+      VERSION: '0.3.1'
+    dependencies:
+      - compile.duf
+    only:
+      changes:
+        - "duf/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'Disk Usage/Free Utility (Linux, BSD & macOS)'
+        --rpm-summary 'Disk Usage/Free Utility (Linux, BSD & macOS)'
+        --vendor morawskim
+        --license MIT
+        --url https://github.com/muesli/duf
+        ./artefacts/duf=/usr/bin/
+        ./artefacts/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+        ./artefacts/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

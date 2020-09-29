@@ -37,3 +37,5 @@ Piplelines to build rpm packages.
 `dive` - [dive](https://github.com/wagoodman/dive) A tool for exploring a docker image, layer contents, and discovering ways to shrink the size of your Docker/OCI image.
 
 `xrectsel` - [xrectsel](https://bbs.archlinux.org/viewtopic.php?id=85378) Select a screen area with mouse and return the geometry of this area.
+
+`duf` - [duf](https://github.com/muesli/duf) Disk Usage/Free Utility (Linux, BSD & macOS)
