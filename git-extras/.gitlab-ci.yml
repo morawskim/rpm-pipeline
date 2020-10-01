@@ -1,0 +1,73 @@
+variables:
+  GIT_EXTRAS_VERSION: 4.2.0
+
+compile.git-extras:
+  stage: build
+  image: ruby:2.6-stretch
+  script:
+    - gem install ronn
+    - mkdir git-extras-artifacts
+    - wget -Ogit-extras.tar.gz https://github.com/tj/git-extras/archive/${GIT_EXTRAS_VERSION}/git-extras-${GIT_EXTRAS_VERSION}.tar.gz
+    - tar xzvf git-extras.tar.gz
+    - pushd git-extras-${GIT_EXTRAS_VERSION}
+    # scripts already use bash
+    # remove `/usr/bin/env` from hashbang
+    - sed -i -e "s/\/usr\/bin\/.*sh/\/bin\/bash/g" bin/*
+    # stop ruby split-method compaining about
+    # `invalid byte sequence in US-ASCII (ArgumentError)`
+    # by exporting UTF-8 encoding to C-locale.
+    - export LC_CTYPE="C.UTF-8"
+    - pushd man
+    # build manpages and HTML-doc
+    - ./manning-up.sh
+    # replace all (escaped-dots) (\.) with the proper
+    # escape-sequence for <dot> in manpages (\[char46])
+    # (rubygem-)ronn doesn't handle this correctly.
+    - sed -ie "s/\\\\\./\\\\\[char46\]/g" *.1
+    - popd
+    - make install PREFIX=../git-extras-artifacts SYSCONFDIR=../git-extras-artifacts
+    - cp LICENSE Commands.md Readme.md ../git-extras-artifacts/
+  only:
+    changes:
+      - "git-extras/*"
+  artifacts:
+    paths:
+      - git-extras-artifacts/
+
+rpm.git-extras:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'git-extras'
+      VERSION: $GIT_EXTRAS_VERSION
+    dependencies:
+      - compile.git-extras
+    only:
+      changes:
+        - "git-extras/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'git-extras adds the following extra-commands to git: alias, archive-file, bug, changelog, commits-since, contrib, count, create-branch, delete-branch, delete-submodule, delete-tag, effort, extras, feature, fresh-branch, gh-pages, graft, ignore, info, local-commits, obliterate, promote, refactor, release, repl, setup, squash, summary, touch, undo For more information about the extra-commands, see the included README.md, HTML, mark-down or man-pages.'
+        --rpm-summary 'Little git extras'
+        --vendor morawskim
+        --license 'MIT'
+        --url https://github.com/tj/git-extras
+        -a all
+        --depends git
+        --depends bash-completion
+        git-extras-artifacts/bin/=/usr/bin/
+        git-extras-artifacts/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+        git-extras-artifacts/share/man/man1/=/usr/share/man/man1/
+        git-extras-artifacts/bash_completion.d/=/etc/bash_completion.d/
+        git-extras-artifacts/Commands.md=/usr/share/doc/packages/${PACKAGE_NAME}/Commands.md
+        git-extras-artifacts/Readme.md=/usr/share/doc/packages/${PACKAGE_NAME}/Readme.md
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm

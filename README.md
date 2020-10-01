@@ -39,3 +39,5 @@ Piplelines to build rpm packages.
 `xrectsel` - [xrectsel](https://bbs.archlinux.org/viewtopic.php?id=85378) Select a screen area with mouse and return the geometry of this area.
 
 `duf` - [duf](https://github.com/muesli/duf) Disk Usage/Free Utility (Linux, BSD & macOS)
+
+`git-extras` - [git-extras](https://github.com/tj/git-extras) Little git extras
