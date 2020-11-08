@@ -41,3 +41,5 @@ Piplelines to build rpm packages.
 `duf` - [duf](https://github.com/muesli/duf) Disk Usage/Free Utility (Linux, BSD & macOS)
 
 `git-extras` - [git-extras](https://github.com/tj/git-extras) Little git extras
+
+`gron` - [gron](https://github.com/tomnomnom/gron) Make JSON greppable!

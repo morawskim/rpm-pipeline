@@ -11,6 +11,7 @@ include:
   - 'docker-ls/.gitlab-ci.yml'
   - 'duf/.gitlab-ci.yml'
   - 'git-extras/.gitlab-ci.yml'
+  - 'gron/.gitlab-ci.yml'
   - 'git-quick-stats/.gitlab-ci.yml'
   - 'hyperfine/.gitlab-ci.yml'
   - 'journalcheck/.gitlab-ci.yml'

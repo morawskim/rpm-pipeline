@@ -1,0 +1,55 @@
+variables:
+  GRON_VERSION: '0.6.0'
+
+compile.gron:
+  stage: build
+  image: golang:1.14
+  script:
+    - go get -u github.com/tomnomnom/gron
+    - pushd /go/src/github.com/tomnomnom/gron
+    - git checkout v${GRON_VERSION}
+    - go build ./...
+    - popd
+    - mkdir -p gron-${GRON_VERSION}
+    - mv /go/src/github.com/tomnomnom/gron/gron gron-${GRON_VERSION}/gron
+    - cp /go/src/github.com/tomnomnom/gron/{README.mkd,LICENSE,ADVANCED.mkd,CHANGELOG.mkd}  gron-${GRON_VERSION}
+  only:
+    changes:
+      - "gron/*"
+  artifacts:
+    paths:
+      - gron-${GRON_VERSION}/
+
+rpm.gron:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    variables:
+      PACKAGE_NAME: 'gron'
+      VERSION: $GRON_VERSION
+    dependencies:
+      - compile.gron
+    only:
+      changes:
+        - "gron/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description "gron transforms JSON into discrete assignments to make it easier to grep for what you want and see the absolute 'path' to it. It eases the exploration of APIs that return large blobs of JSON but have terrible documentation."
+        --rpm-summary 'Make JSON greppable!'
+        --vendor morawskim
+        --license 'MIT'
+        --url https://github.com/tomnomnom/gron
+        ./gron-${GRON_VERSION}/gron=/usr/bin/
+        ./gron-${GRON_VERSION}/README.mkd=/usr/share/doc/packages/${PACKAGE_NAME}/README.mkd
+        ./gron-${GRON_VERSION}/ADVANCED.mkd=/usr/share/doc/packages/${PACKAGE_NAME}/ADVANCED.mkd
+        ./gron-${GRON_VERSION}/CHANGELOG.mkd=/usr/share/doc/packages/${PACKAGE_NAME}/CHANGELOG.mkd
+        ./gron-${GRON_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-*.x86_64.rpm
