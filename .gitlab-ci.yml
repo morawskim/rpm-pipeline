@@ -25,3 +25,12 @@ include:
   - 'xrectsel/.gitlab-ci.yml'
   - 'yadm/.gitlab-ci.yml'
   - 'yum-scripts/.gitlab-ci.yml'
+
+dog_pipeline:
+  stage: build
+  only:
+    changes:
+      - dog/*
+  trigger:
+    include:
+      - local: dog/.gitlab-ci.yml

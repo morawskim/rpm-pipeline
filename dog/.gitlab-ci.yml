@@ -1,0 +1,56 @@
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'dog-dns'
+  VERSION: '0.1.0'
+
+compile:
+  stage: build
+  image: rust:1.45
+  script:
+    - apt-get -y update && apt-get install -y pandoc
+    - wget -Odog.tar.gz https://github.com/ogham/dog/archive/v${VERSION}.tar.gz
+    - tar xvzf dog.tar.gz
+    - cd dog-${VERSION}
+    - cargo build --release
+    - pandoc --standalone -f markdown -t man man/dog.1.md > target/dog.1
+  only:
+    changes:
+      - "dog/*"
+  artifacts:
+    paths:
+      - dog-${VERSION}/target/release/dog
+      - dog-${VERSION}/target/dog.1
+      - dog-${VERSION}/LICENCE
+      - dog-${VERSION}/README.md
+
+rpm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    dependencies:
+      - compile
+    only:
+      changes:
+        - "dog/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'dog is a command-line DNS client, like dig. It has colourful output, understands normal command-line argument syntax, supports the DNS-over-TLS and DNS-over-HTTPS protocols, and can emit JSON.'
+        --rpm-summary 'Command-line DNS client'
+        --vendor morawskim
+        --license EUPL
+        --url https://github.com/ogham/dog
+        dog-${VERSION}/target/release/dog=/usr/bin/
+        dog-${VERSION}/target/dog.1=/usr/share/man/man1/${PACKAGE_NAME}.1
+        dog-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+        dog-${VERSION}/LICENCE=/usr/share/licenses/${PACKAGE_NAME}/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

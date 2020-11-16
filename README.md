@@ -43,3 +43,5 @@ Piplelines to build rpm packages.
 `git-extras` - [git-extras](https://github.com/tj/git-extras) Little git extras
 
 `gron` - [gron](https://github.com/tomnomnom/gron) Make JSON greppable!
+
+`dog` - [dog](https://github.com/ogham/dog) Command-line DNS client
