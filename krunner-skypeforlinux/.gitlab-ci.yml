@@ -1,0 +1,26 @@
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'krunner-skypeforlinux'
+  VERSION: '0.1.0.20171125'
+  SPECFILE: 'krunner-skypeforlinux/krunner-skypeforlinux.spec'
+
+rpm:
+  stage: build
+  image: 
+    name: morawskim/opensuse-leap-debug:15.0.2020-11-13
+    entrypoint: ["/bin/bash", "-c"]
+  script:
+    - zypper --non-interactive in cmake krunner-devel ktextwidgets-devel extra-cmake-modules rpmdevtools rpm-build
+    - mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+    - rpmdev-spectool --all --get-files --directory rpmbuild/SOURCES/ ${SPECFILE}
+    - rpmbuild -ba --define="_topdir $PWD/rpmbuild" ${SPECFILE}
+    - mv rpmbuild/RPMS/x86_64/krunner-skypeforlinux-*.x86_64.rpm .
+  only:
+    changes:
+      - "krunner-skypeforlinux/*"
+  artifacts:
+    paths:
+      - krunner-skypeforlinux-*.x86_64.rpm

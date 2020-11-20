@@ -34,3 +34,12 @@ dog_pipeline:
   trigger:
     include:
       - local: dog/.gitlab-ci.yml
+
+krunner-skypeforlinux_pipeline:
+  stage: build
+  only:
+    changes:
+      - krunner-skypeforlinux/*
+  trigger:
+    include:
+      - local: krunner-skypeforlinux/.gitlab-ci.yml
