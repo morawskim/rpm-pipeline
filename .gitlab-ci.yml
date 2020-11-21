@@ -43,3 +43,12 @@ krunner-skypeforlinux_pipeline:
   trigger:
     include:
       - local: krunner-skypeforlinux/.gitlab-ci.yml
+
+susepaste-qt_pipeline:
+  stage: build
+  only:
+    changes:
+      - susepaste-qt/*
+  trigger:
+    include:
+      - local: susepaste-qt/.gitlab-ci.yml
