@@ -52,3 +52,12 @@ susepaste-qt_pipeline:
   trigger:
     include:
       - local: susepaste-qt/.gitlab-ci.yml
+
+jetbrains-toolbox_pipeline:
+  stage: build
+  only:
+    changes:
+      - jetbrains-toolbox/*
+  trigger:
+    include:
+      - local: jetbrains-toolbox/.gitlab-ci.yml

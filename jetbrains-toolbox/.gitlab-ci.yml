@@ -1,0 +1,33 @@
+stages:
+  - package
+
+variables:
+  PACKAGE_NAME: 'jetbrains-toolbox'
+  VERSION: '1.11.4269'
+
+rpm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    only:
+      changes:
+        - "jetbrains-toolbox/*"
+    script:
+      - curl -L --output jetbrains-toolbox.tar.gz https://download.jetbrains.com/toolbox/jetbrains-toolbox-${VERSION}.tar.gz
+      - tar xzvf jetbrains-toolbox.tar.gz
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - cat ~/.rpmmacros
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description "Manage product updates with ease\n\nThe pace of technologies and software updates is ever-accelerating. Stay\nup-to-date without compromising your productivity with the Toolbox App: easily\nmaintain several versions of the same tool, install updates, and roll them back\ninstantly if needed.\n\n\nMultiple product versions and EAPs\n\nToolbox App makes handling several versions of a product easy and painless. No\nmore worries about where to install or how to remove your favorite tool.\nCurious enough to try new features? Toolbox supports Early Access Programs too.\n\n\nAll your projects — in one place\n\nThe Toolbox App knows which IDE you use for which project. It shows all your\nprojects in one list with one-click open action inside the right IDE, and in\nits right version if you have several installed. Even if you use a single IDE\nand have multiple projects, the Toolbox App will save you clicks opening them.\n\n\nLogin only once and for all\n\nThe Toolbox app remembers your JetBrains Account and uses it to automatically\nlog you into other tools you install."
+        --rpm-summary 'A control panel for your tools and projects'
+        --vendor morawskim
+        --license 'Commercial'
+        --url https://www.jetbrains.com/toolbox/app
+        ./jetbrains-toolbox-${VERSION}/jetbrains-toolbox=/usr/bin/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-*.rpm
