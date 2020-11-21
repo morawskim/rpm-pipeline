@@ -61,3 +61,12 @@ jetbrains-toolbox_pipeline:
   trigger:
     include:
       - local: jetbrains-toolbox/.gitlab-ci.yml
+
+nullmailer_pipeline:
+  stage: build
+  only:
+    changes:
+      - nullmailer/*
+  trigger:
+    include:
+      - local: nullmailer/.gitlab-ci.yml

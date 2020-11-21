@@ -1,0 +1,26 @@
+stages:
+  - package
+
+variables:
+  PACKAGE_NAME: 'nullmailer'
+  VERSION: '2.0'
+  SPECFILE: 'nullmailer/nullmailer.spec'
+
+rpm:
+  stage: package
+  image:
+    name: morawskim/opensuse-leap-debug:15.0.2020-11-13
+    entrypoint: ["/bin/bash", "-c"]
+  script:
+    - zypper --non-interactive in gcc-c++ gnutls-devel rpmdevtools rpm-build
+    - mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+    - cp nullmailer/nullmailer.service rpmbuild/SOURCES
+    - rpmdev-spectool --all --get-files --directory rpmbuild/SOURCES/ ${SPECFILE}
+    - rpmbuild -ba --define="_topdir $PWD/rpmbuild" ${SPECFILE}
+    - mv rpmbuild/RPMS/x86_64/nullmailer-*.x86_64.rpm .
+  only:
+    changes:
+      - "nullmailer/*"
+  artifacts:
+    paths:
+      - nullmailer-*.x86_64.rpm

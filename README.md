@@ -45,3 +45,5 @@ Piplelines to build rpm packages.
 `gron` - [gron](https://github.com/tomnomnom/gron) Make JSON greppable!
 
 `dog` - [dog](https://github.com/ogham/dog) Command-line DNS client
+
+`nullmailer` - [nullmailer](http://untroubled.org/nullmailer/) Simple relay-only mail transport agent
