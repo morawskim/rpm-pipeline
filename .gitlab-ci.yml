@@ -88,3 +88,12 @@ owasp-zap_pipeline:
   trigger:
     include:
       - local: owasp-zap/.gitlab-ci.yml
+
+packer_pipeline:
+  stage: build
+  only:
+    changes:
+      - packer/*
+  trigger:
+    include:
+      - local: packer/.gitlab-ci.yml

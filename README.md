@@ -49,3 +49,5 @@ Piplelines to build rpm packages.
 `nullmailer` - [nullmailer](http://untroubled.org/nullmailer/) Simple relay-only mail transport agent
 
 `zap` - [Zed Attack Proxy](http://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project) The Zed Attack Proxy (ZAP) is an easy to use integrated penetration testing tool for finding vulnerabilities in web applications.
+
+`packer` - [packer](https://www.packer.io/) Packer is a tool for creating identical machine images for multiple platforms from a single source configuration
