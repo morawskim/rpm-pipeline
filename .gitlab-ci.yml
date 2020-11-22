@@ -79,3 +79,12 @@ php-docs_pipeline:
   trigger:
     include:
       - local: php-docs/.gitlab-ci.yml
+
+owasp-zap_pipeline:
+  stage: build
+  only:
+    changes:
+      - owasp-zap/*
+  trigger:
+    include:
+      - local: owasp-zap/.gitlab-ci.yml

@@ -47,3 +47,5 @@ Piplelines to build rpm packages.
 `dog` - [dog](https://github.com/ogham/dog) Command-line DNS client
 
 `nullmailer` - [nullmailer](http://untroubled.org/nullmailer/) Simple relay-only mail transport agent
+
+`zap` - [Zed Attack Proxy](http://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project) The Zed Attack Proxy (ZAP) is an easy to use integrated penetration testing tool for finding vulnerabilities in web applications.
