@@ -1,0 +1,58 @@
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'php-docs'
+
+compile:
+  stage: build
+  image: php:7.4-cli
+  script:
+    - apt-get -y update && apt-get install -y subversion git
+    - svn co --quiet https://svn.php.net/repository/phpdoc/modules/doc-en doc-en
+    - git clone http://git.php.net/repository/phd.git
+    - php doc-en/doc-base/configure.php
+    # Build man pages
+    - php -dmemory_limit=512M ./phd/render.php --docbook ./doc-en/doc-base/.manual.xml --package PHP --format manpage --output docs/man
+    # Build xhtml
+    - php -dmemory_limit=512M ./phd/render.php --docbook ./doc-en/doc-base/.manual.xml --package PHP --format xhtml --outputfilename html --output docs/xhtml
+  only:
+    changes:
+      - "php-docs/*"
+  artifacts:
+    paths:
+      - docs/
+      - doc-en/doc-base/README
+      - doc-en/doc-base/LICENSE
+
+rpm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    dependencies:
+      - compile
+    only:
+      changes:
+        - "php-docs/*"
+    script:
+      - VERSION=$(date +\%Y\%m\%d)
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'The PHP Manual in xhtml and man pages formats'
+        --rpm-summary 'The PHP Manual in xhtml and man pages formats'
+        --vendor morawskim
+        --license MIT
+        --url http://doc.php.net
+        -a all
+        doc-en/doc-base/README=/usr/share/doc/packages/${PACKAGE_NAME}/
+        doc-en/doc-base/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/
+        docs/man/php-functions/=/opt/php/docs/man/man3
+        docs/xhtml/php-chunked-xhtml/=/opt/php/docs/xhtml
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-*.noarch.rpm

@@ -70,3 +70,12 @@ nullmailer_pipeline:
   trigger:
     include:
       - local: nullmailer/.gitlab-ci.yml
+
+php-docs_pipeline:
+  stage: build
+  only:
+    changes:
+      - php-docs/*
+  trigger:
+    include:
+      - local: php-docs/.gitlab-ci.yml
