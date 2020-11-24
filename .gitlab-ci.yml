@@ -97,3 +97,12 @@ packer_pipeline:
   trigger:
     include:
       - local: packer/.gitlab-ci.yml
+
+python-pipx_pipeline:
+  stage: build
+  only:
+    changes:
+      - python-pipx/*
+  trigger:
+    include:
+      - local: python-pipx/.gitlab-ci.yml
