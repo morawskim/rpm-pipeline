@@ -106,3 +106,12 @@ python-pipx_pipeline:
   trigger:
     include:
       - local: python-pipx/.gitlab-ci.yml
+
+xsv_pipeline:
+  stage: build
+  only:
+    changes:
+      - xsv/*
+  trigger:
+    include:
+      - local: xsv/.gitlab-ci.yml

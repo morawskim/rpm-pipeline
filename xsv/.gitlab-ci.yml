@@ -1,0 +1,52 @@
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'xsv'
+  VERSION: '0.13.0'
+
+compile:
+  stage: build
+  image: rust:1.45
+  script:
+    - wget -Oxsv.tar.gz https://github.com/BurntSushi/xsv/archive/${VERSION}.tar.gz
+    - tar xvzf xsv.tar.gz
+    - cd xsv-${VERSION}
+    - cargo build --release
+  only:
+    changes:
+      - "xsv/*"
+  artifacts:
+    paths:
+      - xsv-${VERSION}/target/release/xsv
+      - xsv-${VERSION}/LICENSE-MIT
+      - xsv-${VERSION}/README.md
+
+rpm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    dependencies:
+      - compile
+    only:
+      changes:
+        - "xsv/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'xsv is a command line program for indexing, slicing, analyzing, splitting and joining CSV files. Commands should be simple, fast and composable.'
+        --rpm-summary 'A fast CSV command line toolkit written in Rust.'
+        --vendor morawskim
+        --license MIT
+        --url https://github.com/BurntSushi/xsv
+        xsv-${VERSION}/target/release/xsv=/usr/bin/
+        xsv-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+        xsv-${VERSION}/LICENSE-MIT=/usr/share/licenses/${PACKAGE_NAME}/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
