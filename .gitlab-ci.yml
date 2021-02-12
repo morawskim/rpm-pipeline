@@ -115,3 +115,12 @@ xsv_pipeline:
   trigger:
     include:
       - local: xsv/.gitlab-ci.yml
+
+yq_pipeline:
+  stage: build
+  only:
+    changes:
+      - yq/*
+  trigger:
+    include:
+      - local: yq/.gitlab-ci.yml

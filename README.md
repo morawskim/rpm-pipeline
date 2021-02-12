@@ -53,3 +53,5 @@ Piplelines to build rpm packages.
 `packer` - [packer](https://www.packer.io/) Packer is a tool for creating identical machine images for multiple platforms from a single source configuration
 
 `xsv` - [xsv](https://github.com/BurntSushi/xsv) A fast CSV command line toolkit written in Rust.
+
+`yq` - [yq](https://github.com/mikefarah/yq) A yq is a portable command-line YAML processor.

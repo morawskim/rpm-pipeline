@@ -1,0 +1,52 @@
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'yq'
+  VERSION: '4.5.1'
+
+compile:
+  stage: build
+  image: golang:1.14
+  script:
+    - wget -Oyq.tar.gz https://github.com/mikefarah/yq/archive/v${VERSION}.tar.gz
+    - tar xvzf yq.tar.gz
+    - cd yq-${VERSION}
+    - go build
+  only:
+    changes:
+      - "yq/*"
+  artifacts:
+    paths:
+      - yq-${VERSION}/yq
+      - yq-${VERSION}/README.md
+      - yq-${VERSION}/LICENSE
+
+rpm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    dependencies:
+      - compile
+    only:
+      changes:
+        - "yq/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'a lightweight and portable command-line YAML processor. yq uses jq like syntax but works with yaml files as well as json. It does not yet support everything jq does - but it does support the most common operations and functions, and more is being added continuously.'
+        --rpm-summary 'yq is a portable command-line YAML processor'
+        --vendor morawskim
+        --license MIT
+        --url https://github.com/mikefarah/yq
+        yq-${VERSION}/yq=/usr/bin/
+        yq-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+        yq-${VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
