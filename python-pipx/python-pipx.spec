@@ -19,7 +19,7 @@
 %{?!python_module:%define python_module() python-%{**} python3-%{**}}
 %bcond_without test
 Name:           python-pipx
-Version:        0.12.2.0
+Version:        0.12.3.3
 Release:        1
 License:        MIT
 Summary:        pipx: execute binaries from Python packages in isolated environments

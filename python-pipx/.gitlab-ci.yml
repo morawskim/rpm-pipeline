@@ -8,7 +8,7 @@ variables:
 rpm:
   stage: package
   image:
-    name: morawskim/opensuse-leap-debug:15.0.2020-11-13
+    name: opensuse/leap:15.1
     entrypoint: ["/bin/bash", "-c"]
   script:
     - zypper --non-interactive in python-rpm-macros python2-devel python3-devel python2-setuptools python3-setuptools fdupes rpmdevtools rpm-build
