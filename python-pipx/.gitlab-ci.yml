@@ -11,6 +11,12 @@ rpm:
     name: opensuse/leap:15.1
     entrypoint: ["/bin/bash", "-c"]
   script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
     - zypper --non-interactive in python-rpm-macros python2-devel python3-devel python2-setuptools python3-setuptools fdupes rpmdevtools rpm-build
     - mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
     - rpmdev-spectool --all --get-files --directory rpmbuild/SOURCES/ --define 'is_spectool 1' ${SPECFILE}

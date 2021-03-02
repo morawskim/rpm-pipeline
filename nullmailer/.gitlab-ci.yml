@@ -12,6 +12,12 @@ rpm:
     name: morawskim/opensuse-leap-debug:15.0.2020-11-13
     entrypoint: ["/bin/bash", "-c"]
   script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
     - zypper --non-interactive in gcc-c++ gnutls-devel rpmdevtools rpm-build
     - mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
     - cp nullmailer/nullmailer.service rpmbuild/SOURCES
