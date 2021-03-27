@@ -124,3 +124,12 @@ yq_pipeline:
   trigger:
     include:
       - local: yq/.gitlab-ci.yml
+
+ventoy_pipeline:
+  stage: build
+  only:
+    changes:
+      - ventoy/*
+  trigger:
+    include:
+      - local: ventoy/.gitlab-ci.yml

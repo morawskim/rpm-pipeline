@@ -55,3 +55,5 @@ Piplelines to build rpm packages.
 `xsv` - [xsv](https://github.com/BurntSushi/xsv) A fast CSV command line toolkit written in Rust.
 
 `yq` - [yq](https://github.com/mikefarah/yq) A yq is a portable command-line YAML processor.
+
+`ventoy` - [ventoy](https://github.com/ventoy/Ventoy) Ventoy is an open source tool to create bootable USB drive for ISO/WIM/IMG/VHD(x)/EFI files.
