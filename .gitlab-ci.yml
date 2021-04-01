@@ -133,3 +133,12 @@ ventoy_pipeline:
   trigger:
     include:
       - local: ventoy/.gitlab-ci.yml
+
+libxtst_pipeline:
+  stage: build
+  only:
+    changes:
+      - libXtst/*
+  trigger:
+    include:
+      - local: libXtst/.gitlab-ci.yml
