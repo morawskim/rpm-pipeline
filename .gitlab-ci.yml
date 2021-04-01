@@ -142,3 +142,12 @@ libxtst_pipeline:
   trigger:
     include:
       - local: libXtst/.gitlab-ci.yml
+
+libuuid_pipeline:
+  stage: build
+  only:
+    changes:
+      - libuuid/*
+  trigger:
+    include:
+      - local: libuuid/.gitlab-ci.yml
