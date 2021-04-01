@@ -151,3 +151,12 @@ libuuid_pipeline:
   trigger:
     include:
       - local: libuuid/.gitlab-ci.yml
+
+nss_pipeline:
+  stage: build
+  only:
+    changes:
+      - nss/*
+  trigger:
+    include:
+      - local: nss/.gitlab-ci.yml
