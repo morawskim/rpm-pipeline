@@ -160,3 +160,12 @@ nss_pipeline:
   trigger:
     include:
       - local: nss/.gitlab-ci.yml
+
+htmlq_pipeline:
+  stage: build
+  only:
+    changes:
+      - htmlq/*
+  trigger:
+    include:
+      - local: htmlq/.gitlab-ci.yml

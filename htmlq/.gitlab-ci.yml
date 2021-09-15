@@ -1,0 +1,52 @@
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'htmlq'
+  VERSION: '0.2.0'
+
+compile:
+  stage: build
+  image: rust:1.45
+  script:
+    - wget -Ohtmlq.tar.gz https://github.com/mgdm/htmlq/archive/v${VERSION}.tar.gz
+    - tar xvzf htmlq.tar.gz
+    - cd htmlq-${VERSION}
+    - cargo build --release
+  only:
+    changes:
+      - "htmlq/*"
+  artifacts:
+    paths:
+      - htmlq-${VERSION}/target/release/htmlq
+      - htmlq-${VERSION}/LICENSE.md
+      - htmlq-${VERSION}/README.md
+
+rpm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    dependencies:
+      - compile
+    only:
+      changes:
+        - "htmlq/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'Like jq, but for HTML. Uses CSS selectors to extract bits of content from HTML files.'
+        --rpm-summary 'Like jq, but for HTML.'
+        --vendor morawskim
+        --license MIT
+        --url https://github.com/mgdm/htmlq
+        htmlq-${VERSION}/target/release/htmlq=/usr/bin/
+        htmlq-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+        htmlq-${VERSION}/LICENSE.md=/usr/share/licenses/${PACKAGE_NAME}/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
