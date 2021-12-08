@@ -3,7 +3,7 @@ stages:
 
 variables:
   PACKAGE_NAME: 'jetbrains-toolbox'
-  VERSION: '1.11.4269'
+  VERSION: '1.22.10774'
 
 rpm:
     stage: package
