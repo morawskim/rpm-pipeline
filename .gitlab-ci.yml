@@ -169,3 +169,12 @@ htmlq_pipeline:
   trigger:
     include:
       - local: htmlq/.gitlab-ci.yml
+
+gdu_pipeline:
+  stage: build
+  only:
+    changes:
+      - gdu/*
+  trigger:
+    include:
+      - local: gdu/.gitlab-ci.yml

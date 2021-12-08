@@ -59,3 +59,5 @@ Piplelines to build rpm packages.
 `ventoy` - [ventoy](https://github.com/ventoy/Ventoy) Ventoy is an open source tool to create bootable USB drive for ISO/WIM/IMG/VHD(x)/EFI files.
 
 `htmlq` - [htmlq](https://github.com/mgdm/htmlq) Like jq, but for HTML. Uses CSS selectors to extract bits of content from HTML files.
+
+`gdu` - [gdu](https://github.com/dundee/gdu) Disk usage analyzer with console interface written in Go.
