@@ -178,3 +178,12 @@ gdu_pipeline:
   trigger:
     include:
       - local: gdu/.gitlab-ci.yml
+
+lsd_pipeline:
+  stage: build
+  only:
+    changes:
+      - lsd/*
+  trigger:
+    include:
+      - local: lsd/.gitlab-ci.yml

@@ -1,0 +1,52 @@
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'lsd'
+  VERSION: '0.20.1'
+
+compile:
+  stage: build
+  image: rust:1.45
+  script:
+    - wget -Olsd.tar.gz https://github.com/Peltoche/lsd/archive/refs/tags/${VERSION}.tar.gz
+    - tar xvzf lsd.tar.gz
+    - cd lsd-${VERSION}
+    - cargo build --release
+  only:
+    changes:
+      - "lsd/*"
+  artifacts:
+    paths:
+      - lsd-${VERSION}/target/release/lsd
+      - lsd-${VERSION}/LICENSE
+      - lsd-${VERSION}/doc/lsd.md
+
+rpm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    dependencies:
+      - compile
+    only:
+      changes:
+        - "lsd/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'This project is a rewrite of GNU ls with lot of added features like colors, icons, tree-view, more formatting options etc'
+        --rpm-summary 'The next gen ls command.'
+        --vendor morawskim
+        --license Apachev2
+        --url https://github.com/Peltoche/lsd
+        lsd-${VERSION}/target/release/lsd=/usr/bin/
+        lsd-${VERSION}/doc/lsd.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+        lsd-${VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

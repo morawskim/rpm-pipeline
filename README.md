@@ -61,3 +61,5 @@ Piplelines to build rpm packages.
 `htmlq` - [htmlq](https://github.com/mgdm/htmlq) Like jq, but for HTML. Uses CSS selectors to extract bits of content from HTML files.
 
 `gdu` - [gdu](https://github.com/dundee/gdu) Disk usage analyzer with console interface written in Go.
+
+`lsd` - [lsd](https://github.com/Peltoche/lsd) The next gen ls command.
