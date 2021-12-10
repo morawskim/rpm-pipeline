@@ -19,7 +19,7 @@
 %{?!python_module:%define python_module() python-%{**} python3-%{**}}
 %bcond_without test
 Name:           python-pipx
-Version:        0.12.3.3
+Version:        0.16.4
 Release:        1
 License:        MIT
 Summary:        pipx: execute binaries from Python packages in isolated environments
@@ -30,7 +30,11 @@ BuildRequires:  python-rpm-macros
 BuildRequires:  %{python_module devel}
 BuildRequires:  %{python_module setuptools}
 BuildRequires:  fdupes
+Requires:       python-argcomplete >= 1.9.4
 Requires:       python-setuptools
+Requires:       python-userpath
+Requires(post):   update-alternatives
+Requires(postun):  update-alternatives
 BuildArch:      noarch
 
 %if ! 0%{?is_spectool}
@@ -107,5 +111,8 @@ pipx is working!
 %{python_sitelib}/*
 
 %changelog
+* Fri Dec 10 2021 Marcin Morawski <marcin@morawskim.pl>
+-  Update to 0.16.4
+
 * Tue Feb 19 2019 Marcin Morawski <marcin@morawskim.pl>
 -  init package
