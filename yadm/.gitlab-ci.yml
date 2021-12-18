@@ -1,5 +1,5 @@
 variables:
-  YADM_VERSION: 1.10.0
+  YADM_VERSION: 3.1.1
 
 compile.yadm:
   stage: build
@@ -15,7 +15,7 @@ compile.yadm:
       - "yadm/*"
   artifacts:
     paths:
-      - yadm-${YADM_VERSION}/completion/yadm.bash_completion
+      - yadm-${YADM_VERSION}/completion/bash/yadm
       - yadm-${YADM_VERSION}/yadm.1
       - yadm-${YADM_VERSION}/docs
       - yadm-${YADM_VERSION}/LICENSE
@@ -52,7 +52,7 @@ rpm.yadm:
         ./yadm-${YADM_VERSION}/yadm=/usr/bin/
         ./yadm-${YADM_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
         ./yadm-${YADM_VERSION}/yadm.1=/usr/share/man/man1/${PACKAGE_NAME}.1
-        ./yadm-${YADM_VERSION}/completion/yadm.bash_completion=/etc/bash_completion.d/${PACKAGE_NAME}
+        ./yadm-${YADM_VERSION}/completion/bash/yadm=/etc/bash_completion.d/${PACKAGE_NAME}
         ./yadm-${YADM_VERSION}/docs=/usr/share/doc/packages/${PACKAGE_NAME}
     artifacts:
       paths:
