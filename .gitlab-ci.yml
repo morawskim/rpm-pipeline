@@ -187,3 +187,12 @@ lsd_pipeline:
   trigger:
     include:
       - local: lsd/.gitlab-ci.yml
+
+captain_pipeline:
+  stage: build
+  only:
+    changes:
+      - captain/*
+  trigger:
+    include:
+      - local: captain/.gitlab-ci.yml

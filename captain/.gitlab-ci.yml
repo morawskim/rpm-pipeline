@@ -1,0 +1,64 @@
+stages:
+  - init
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'captain'
+  VERSION: '0.3.4~RC1'
+  COMMIT: '81e879f7dc855896a3abd5a7ecb3143e7c141af4'
+
+dependiencies:
+  stage: init
+  image:
+    name: instrumentisto/glide
+    entrypoint: [""]
+  script:
+    - wget -Ocaptain.tar.gz https://github.com/jenssegers/captain/archive/${COMMIT}.tar.gz
+    - tar xvzf captain.tar.gz
+    - cd captain-${COMMIT}
+    - glide install
+  artifacts:
+    paths:
+      - captain-${COMMIT}/
+
+compile:
+  stage: build
+  image: golang:1.14
+  script:
+    - ln -s $PWD/captain-${COMMIT} $GOPATH/src/captain
+    - pushd /go/src/captain
+    - GOOS=linux go build -o dist/captain
+  only:
+    changes:
+      - "captain/*"
+  artifacts:
+    paths:
+      - captain-${COMMIT}/dist/captain
+      - captain-${COMMIT}/README.md
+
+rpm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    dependencies:
+      - compile
+    only:
+      changes:
+        - "captain/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'Easily start and stop docker compose projects'
+        --vendor morawskim
+        --license Commercial
+        --url https://github.com/jenssegers/captain
+        captain-${COMMIT}/dist/captain=/usr/bin/
+        captain-${COMMIT}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

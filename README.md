@@ -63,3 +63,5 @@ Piplelines to build rpm packages.
 `gdu` - [gdu](https://github.com/dundee/gdu) Disk usage analyzer with console interface written in Go.
 
 `lsd` - [lsd](https://github.com/Peltoche/lsd) The next gen ls command.
+
+`captain` - [captain](https://github.com/jenssegers/captain) Easily start and stop docker compose projects.
