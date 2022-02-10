@@ -196,3 +196,12 @@ captain_pipeline:
   trigger:
     include:
       - local: captain/.gitlab-ci.yml
+
+git-trim_pipeline:
+  stage: build
+  only:
+    changes:
+      - git-trim/*
+  trigger:
+    include:
+      - local: git-trim/.gitlab-ci.yml

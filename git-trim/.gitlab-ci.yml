@@ -1,0 +1,52 @@
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'git-trim'
+  VERSION: '20220207'
+  COMMIT: 'fd74418e289ae081866f94a1e7fa809d98bfe0e4'
+
+compile:
+  stage: build
+  image: rust:1.45
+  script:
+    - wget -Ogit-trim.tar.gz https://github.com/jasonmccreary/git-trim/archive/${COMMIT}.tar.gz
+    - tar xvzf git-trim.tar.gz
+  only:
+    changes:
+      - "git-trim/*"
+  artifacts:
+    paths:
+      - git-trim-${COMMIT}/git-trim
+      - git-trim-${COMMIT}/LICENSE.md
+      - git-trim-${COMMIT}/README.md
+
+rpm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    dependencies:
+      - compile
+    only:
+      changes:
+        - "git-trim/*"
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'A command to quickly remove merged, pruned, untracked, or stale branches within a repository.'
+        --rpm-summary 'A command to quickly remove merged, pruned, untracked, or stale branches within a repository.'
+        --vendor morawskim
+        --license MIT
+        --url https://github.com/jasonmccreary/git-trim
+        -a all
+        git-trim-${COMMIT}/git-trim=/usr/bin/
+        git-trim-${COMMIT}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+        git-trim-${COMMIT}/LICENSE.md=/usr/share/licenses/${PACKAGE_NAME}/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm

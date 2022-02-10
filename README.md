@@ -65,3 +65,5 @@ Piplelines to build rpm packages.
 `lsd` - [lsd](https://github.com/Peltoche/lsd) The next gen ls command.
 
 `captain` - [captain](https://github.com/jenssegers/captain) Easily start and stop docker compose projects.
+
+`git-trim` - [git-trim](https://github.com/jasonmccreary/git-trim) A command to quickly remove merged, pruned, untracked, or stale branches within a repository.
