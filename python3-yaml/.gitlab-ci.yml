@@ -1,0 +1,31 @@
+stages:
+  - package
+
+variables:
+  PACKAGE_NAME: 'fake-python3-yaml'
+  VERSION: '0.1.0'
+  SPECFILE: 'python3-yaml/fake-python3-yaml.spec'
+
+rpm:
+  stage: package
+  image:
+    name: morawskim/opensuse-leap-debug:15.0.2020-11-13
+    entrypoint: ["/bin/bash", "-c"]
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - zypper --non-interactive in rpmdevtools rpm-build
+    - mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+    - rpmdev-spectool --all --get-files --directory rpmbuild/SOURCES/ ${SPECFILE}
+    - rpmbuild -ba --define="_sourcedir $PWD" --define="_topdir $PWD/rpmbuild" ${SPECFILE}
+    - mv rpmbuild/RPMS/noarch/fake-python3-yaml-*.noarch.rpm .
+  only:
+    changes:
+      - "python3-yaml/*"
+  artifacts:
+    paths:
+      - fake-python3-yaml-*.noarch.rpm

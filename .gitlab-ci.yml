@@ -205,3 +205,12 @@ git-trim_pipeline:
   trigger:
     include:
       - local: git-trim/.gitlab-ci.yml
+
+python3-yaml_pipeline:
+  stage: build
+  only:
+    changes:
+      - python3-yaml/*
+  trigger:
+    include:
+      - local: python3-yaml/.gitlab-ci.yml
