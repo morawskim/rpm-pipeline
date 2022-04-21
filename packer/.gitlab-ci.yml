@@ -1,3 +1,11 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - packer/*
+    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
+      when: always
+
 stages:
   - build
   - package
@@ -16,9 +24,6 @@ compile:
     - ln -s $PWD/packer-${VERSION} $GOPATH/src/github.com/hashicorp/packer
     - pushd /go/src/github.com/hashicorp/packer
     - go build -o bin/packer .
-  only:
-    changes:
-      - "packer/*"
   artifacts:
     paths:
       - packer-${VERSION}/bin/packer
@@ -31,9 +36,6 @@ rpm:
     image: alanfranz/fpm-within-docker:centos-7
     dependencies:
       - compile
-    only:
-      changes:
-        - "packer/*"
     script:
       - |
         cat > ~/.rpmmacros << EOF

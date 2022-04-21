@@ -91,9 +91,13 @@ owasp-zap_pipeline:
 
 packer_pipeline:
   stage: build
-  only:
-    changes:
-      - packer/*
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - packer/*
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: manual
+      allow_failure: true
   trigger:
     include:
       - local: packer/.gitlab-ci.yml
