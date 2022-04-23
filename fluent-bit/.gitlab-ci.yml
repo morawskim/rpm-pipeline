@@ -1,0 +1,35 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - fluent-bit/*
+    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
+      when: always
+
+stages:
+  - package
+
+variables:
+  SPECFILE: 'fluent-bit.spec'
+
+rpm:
+  stage: package
+  image:
+    name: morawskim/opensuse-leap-debug:15.3
+    entrypoint: ["/bin/bash", "-c"]
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - zypper --non-interactive in cmake wget gcc-c++ flex bison rpmdevtools systemd-devel zlib-devel
+    - pushd fluent-bit
+    - mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+    - rpmdev-spectool --all --get-files --directory ./ ${SPECFILE}
+    - rpmbuild -ba --define="_sourcedir $PWD" --define="_topdir $PWD/rpmbuild" ${SPECFILE}
+    - mv rpmbuild/RPMS/x86_64/fluent-bit-*.x86_64.rpm .
+  artifacts:
+    paths:
+      - fluent-bit/fluent-bit-*.x86_64.rpm

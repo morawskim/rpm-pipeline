@@ -1,0 +1,14 @@
+[Unit]
+Description=fluent-bit
+Documentation=https://docs.fluentbit.io
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/fluent-bit -c /etc/fluent-bit/fluent-bit.conf
+Restart=on-failure
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

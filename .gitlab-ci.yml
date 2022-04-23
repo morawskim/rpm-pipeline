@@ -218,3 +218,16 @@ python3-yaml_pipeline:
   trigger:
     include:
       - local: python3-yaml/.gitlab-ci.yml
+
+fluent-bit_pipeline:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - fluent-bit/*
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: manual
+      allow_failure: true
+  trigger:
+    include:
+      - local: fluent-bit/.gitlab-ci.yml
