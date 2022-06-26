@@ -1,13 +1,15 @@
 variables:
-  NGROK_VERSION: 2.3.35
+  NGROK_VERSION: 3.0.5
 
 compile.ngrok:
   stage: build
-  image: rust:1.44
+  image: ubuntu:22.04
   script:
+    - apt-get update
+    - apt-get install -y wget
     - mkdir -p ngrok-bin
-    - wget -Ongrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
-    - unzip -d ngrok-bin ngrok.zip
+    - wget -Ongrok.tgz https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+    - tar xzvf ngrok.tgz -C ngrok-bin
   only:
     changes:
       - "ngrok/*"
