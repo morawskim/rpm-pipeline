@@ -3,7 +3,7 @@ stages:
 
 variables:
   PACKAGE_NAME: 'jetbrains-toolbox'
-  VERSION: '1.22.10774'
+  VERSION: '1.25.12424'
 
 rpm:
     stage: package
@@ -12,7 +12,7 @@ rpm:
       changes:
         - "jetbrains-toolbox/*"
     script:
-      - curl -L --output jetbrains-toolbox.tar.gz https://download.jetbrains.com/toolbox/jetbrains-toolbox-${VERSION}.tar.gz
+      - curl -L --output jetbrains-toolbox.tar.gz https://download-cdn.jetbrains.com/toolbox/jetbrains-toolbox-${VERSION}.tar.gz
       - tar xzvf jetbrains-toolbox.tar.gz
       - |
         cat > ~/.rpmmacros << EOF
