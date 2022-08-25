@@ -67,3 +67,5 @@ Piplelines to build rpm packages.
 `captain` - [captain](https://github.com/jenssegers/captain) Easily start and stop docker compose projects.
 
 `git-trim` - [git-trim](https://github.com/jasonmccreary/git-trim) A command to quickly remove merged, pruned, untracked, or stale branches within a repository.
+
+`aws` = [aws](https://github.com/aws/aws-cli) Amazon Web Services Command Line Interface v2

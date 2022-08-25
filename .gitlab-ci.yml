@@ -231,3 +231,16 @@ fluent-bit_pipeline:
   trigger:
     include:
       - local: fluent-bit/.gitlab-ci.yml
+
+aws-cli2_pipeline:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - aws-cli2/*
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: manual
+      allow_failure: true
+  trigger:
+    include:
+      - local: aws-cli2/.gitlab-ci.yml

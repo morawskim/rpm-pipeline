@@ -1,0 +1,55 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - aws-cli2/*
+    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
+      when: always
+
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'aws-cli2'
+
+compile:
+  stage: build
+  image: rust:1.45
+  script:
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    - unzip awscliv2.zip
+    - ./aws/install -i /usr/local/aws-cli -b /usr/local/bin
+    - /usr/local/bin/aws --version  | grep -oE 'aws-cli/[0-9]+.[0-9]+.[0-9]+' | cut -c9- | tr -d '\n' > VERSION
+    - cat VERSION
+    - mkdir -p BUILD_ROOT/usr/local
+    - mv /usr/local/aws-cli/ BUILD_ROOT/usr/local
+    - mv /usr/local/bin/ BUILD_ROOT/usr/local
+  artifacts:
+    paths:
+      - BUILD_ROOT
+      - VERSION
+
+rpm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    dependencies:
+      - compile
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v $(cat VERSION)
+        --description 'The AWS Command Line Interface (CLI) is a unified tool to manage AWS services. With this tool, multiple AWS services can be controlled from the command line and automated through scripts.'
+        --rpm-summary 'Amazon Web Services Command Line Interface'
+        --vendor morawskim
+        --license Apache-2.0
+        --url https://github.com/aws/aws-cli
+        -a all
+        ./BUILD_ROOT/=/
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-*-1.noarch.rpm
