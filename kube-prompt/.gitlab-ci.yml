@@ -1,0 +1,54 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - kube-prompt/*
+    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
+      when: always
+
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'kube-prompt'
+  VERSION: '1.0.11'
+
+compile:
+  stage: build
+  image: golang:1.14
+  script:
+    - wget -Okube-prompt.tar.gz https://github.com/c-bata/kube-prompt/archive/refs/tags/v${VERSION}.tar.gz
+    - tar xzvf kube-prompt.tar.gz
+    - ln -s $PWD/kube-prompt-${VERSION} $GOPATH/src/kube-prompt
+    - pushd $GOPATH/src/kube-prompt
+    - GO111MODULE=on go build .
+  artifacts:
+    paths:
+      - kube-prompt-${VERSION}/kube-prompt
+      - kube-prompt-${VERSION}/README.md
+      - kube-prompt-${VERSION}/LICENSE
+
+rpm:
+    stage: package
+    image: alanfranz/fpm-within-docker:centos-7
+    dependencies:
+      - compile
+    script:
+      - |
+        cat > ~/.rpmmacros << EOF
+        %packager Marcin Morawski <marcin@morawskim.pl>
+        %vendor morawskim
+        EOF
+      - >
+        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+        --description 'An interactive kubernetes client featuring auto-complete.'
+        --vendor morawskim
+        --license MIT
+        --url https://github.com/c-bata/kube-prompt
+        kube-prompt-${VERSION}/kube-prompt=/usr/bin/
+        kube-prompt-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+        kube-prompt-${VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+    artifacts:
+      paths:
+        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

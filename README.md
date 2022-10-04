@@ -68,4 +68,6 @@ Piplelines to build rpm packages.
 
 `git-trim` - [git-trim](https://github.com/jasonmccreary/git-trim) A command to quickly remove merged, pruned, untracked, or stale branches within a repository.
 
-`aws` = [aws](https://github.com/aws/aws-cli) Amazon Web Services Command Line Interface v2
+`aws` - [aws](https://github.com/aws/aws-cli) Amazon Web Services Command Line Interface v2
+
+`kube-prompt` - [kube-prompt](https://github.com/c-bata/kube-prompt) An interactive kubernetes client featuring auto-complete.
