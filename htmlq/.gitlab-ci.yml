@@ -4,11 +4,11 @@ stages:
 
 variables:
   PACKAGE_NAME: 'htmlq'
-  VERSION: '0.2.0'
+  VERSION: '0.4.0'
 
 compile:
   stage: build
-  image: rust:1.45
+  image: rust:1.66
   script:
     - wget -Ohtmlq.tar.gz https://github.com/mgdm/htmlq/archive/v${VERSION}.tar.gz
     - tar xvzf htmlq.tar.gz
