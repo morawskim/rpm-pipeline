@@ -9,7 +9,6 @@ include:
   - 'dive/.gitlab-ci.yml'
   - 'docker-credential-helpers/.gitlab-ci.yml'
   - 'docker-ls/.gitlab-ci.yml'
-  - 'duf/.gitlab-ci.yml'
   - 'git-extras/.gitlab-ci.yml'
   - 'gron/.gitlab-ci.yml'
   - 'git-quick-stats/.gitlab-ci.yml'
@@ -34,6 +33,15 @@ dog_pipeline:
   trigger:
     include:
       - local: dog/.gitlab-ci.yml
+
+duf_pipeline:
+  stage: build
+  only:
+    changes:
+      - duf/*
+  trigger:
+    include:
+      - local: duf/.gitlab-ci.yml
 
 krunner-skypeforlinux_pipeline:
   stage: build

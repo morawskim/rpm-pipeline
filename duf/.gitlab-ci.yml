@@ -1,17 +1,19 @@
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'duf'
+  VERSION: '0.8.1'
+
 compile.duf:
   stage: build
-  image: golang:1.14
-  variables:
-    VERSION: '0.3.1'
+  image: golang:1.19
   script:
-    - go get github.com/muesli/duf
+    - go install github.com/muesli/duf@v$VERSION
     - mkdir -p artefacts
-    - pushd /go/src/github.com/muesli/duf
-    - git checkout v${VERSION}
-    - go build
-    - popd
-    - cp /go/src/github.com/muesli/duf/README.md /go/src/github.com/muesli/duf/LICENSE artefacts
-    - mv /go/src/github.com/muesli/duf/duf artefacts/
+    - cp /go/pkg/mod/github.com/muesli/duf\@v${VERSION}/README.md /go/pkg/mod/github.com/muesli/duf\@v${VERSION}/LICENSE artefacts
+    - mv /go/bin/duf artefacts/
   only:
     changes:
       - "duf/*"
@@ -22,9 +24,6 @@ compile.duf:
 rpm.duf:
     stage: package
     image: alanfranz/fpm-within-docker:centos-7
-    variables:
-      PACKAGE_NAME: 'duf'
-      VERSION: '0.3.1'
     dependencies:
       - compile.duf
     only:
