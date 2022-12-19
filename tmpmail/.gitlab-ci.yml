@@ -25,11 +25,16 @@ rpm.tmpmail:
     only:
       changes:
         - "tmpmail/*"
+    before_script:
+      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
     script:
       - VERSION=$(grep 'VERSION=' ./tmpmail-master/tmpmail | grep -P -o '([\d]+\.[\d]+\.[\d]+)')
       - |
         cat > ~/.rpmmacros << EOF
         %packager Marcin Morawski <marcin@morawskim.pl>
+        %_signature gpg
+        %_gpg_name morawskim Signing Key
         %vendor morawskim
         EOF
       - cat ~/.rpmmacros
@@ -48,6 +53,7 @@ rpm.tmpmail:
         ./tmpmail-master/tmpmail=/usr/bin/
         ./tmpmail-master/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
         ./tmpmail-master/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
+      - rpm --addsign *.rpm
     artifacts:
       paths:
         - ${PACKAGE_NAME}-*.rpm

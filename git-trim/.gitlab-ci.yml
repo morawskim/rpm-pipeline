@@ -30,10 +30,15 @@ rpm:
     only:
       changes:
         - "git-trim/*"
+    before_script:
+      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
     script:
       - |
         cat > ~/.rpmmacros << EOF
         %packager Marcin Morawski <marcin@morawskim.pl>
+        %_signature gpg
+        %_gpg_name morawskim Signing Key
         %vendor morawskim
         EOF
       - >
@@ -47,6 +52,7 @@ rpm:
         git-trim-${COMMIT}/git-trim=/usr/bin/
         git-trim-${COMMIT}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
         git-trim-${COMMIT}/LICENSE.md=/usr/share/licenses/${PACKAGE_NAME}/
+      - rpm --addsign *.rpm
     artifacts:
       paths:
         - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm

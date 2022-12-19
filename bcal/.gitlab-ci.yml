@@ -32,10 +32,15 @@ rpm.bcal:
     only:
       changes:
         - "bcal/*"
+    before_script:
+      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
     script:
       - |
         cat > ~/.rpmmacros << EOF
         %packager Marcin Morawski <marcin@morawskim.pl>
+        %_signature gpg
+        %_gpg_name morawskim Signing Key
         %vendor morawskim
         EOF
       - cat ~/.rpmmacros
@@ -51,6 +56,7 @@ rpm.bcal:
         ./bcal-${BCAL_VERSION}/bcal=/usr/bin/
         ./bcal-${BCAL_VERSION}/bcal.1=/usr/share/man/man1/${PACKAGE_NAME}.1
         ./bcal-${BCAL_VERSION}/docs=/usr/share/doc/packages/${PACKAGE_NAME}
+      - rpm --addsign *.rpm
     artifacts:
       paths:
         - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

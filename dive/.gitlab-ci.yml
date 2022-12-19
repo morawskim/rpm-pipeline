@@ -31,10 +31,15 @@ rpm.dive:
     only:
       changes:
         - "dive/*"
+    before_script:
+      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
     script:
       - |
         cat > ~/.rpmmacros << EOF
         %packager Marcin Morawski <marcin@morawskim.pl>
+        %_signature gpg
+        %_gpg_name morawskim Signing Key
         %vendor morawskim
         EOF
       - cat ~/.rpmmacros
@@ -48,6 +53,7 @@ rpm.dive:
         ./dive-${DIVE_VERSION}/dive=/usr/bin/
         ./dive-${DIVE_VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
         ./dive-${DIVE_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+      - rpm --addsign *.rpm
     artifacts:
       paths:
         - ${PACKAGE_NAME}-*.x86_64.rpm

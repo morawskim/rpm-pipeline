@@ -28,10 +28,15 @@ rpm:
     only:
       changes:
         - "ventoy/*"
+    before_script:
+      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
     script:
       - |
         cat > ~/.rpmmacros << EOF
         %packager Marcin Morawski <marcin@morawskim.pl>
+        %_signature gpg
+        %_gpg_name morawskim Signing Key
         %vendor morawskim
         EOF
       - >
@@ -42,6 +47,7 @@ rpm:
         --license GPLv3+
         --url https://github.com/ventoy/Ventoy
         ventoy-${VERSION}/=/opt/ventoy/
+      - rpm --addsign *.rpm
     artifacts:
       paths:
         - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

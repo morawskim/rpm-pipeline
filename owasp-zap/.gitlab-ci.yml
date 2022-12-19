@@ -12,12 +12,17 @@ rpm:
     only:
       changes:
         - "owasp-zap/*"
+    before_script:
+      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
     script:
       - curl -L --output zaproxy.tar.gz https://github.com/zaproxy/zaproxy/releases/download/${VERSION}/ZAP_${VERSION}_Linux.tar.gz
       - tar xzvf zaproxy.tar.gz
       - |
         cat > ~/.rpmmacros << EOF
         %packager Marcin Morawski <marcin@morawskim.pl>
+        %_signature gpg
+        %_gpg_name morawskim Signing Key
         %vendor morawskim
         EOF
       - cat ~/.rpmmacros
@@ -33,6 +38,7 @@ rpm:
         ./ZAP_${VERSION}/=${OWASP_DIR}
         owasp-zap/owasp-zap.desktop=/usr/share/applications/
         owasp-zap/owasp-zap.png=/usr/share/pixmaps/
+      - rpm --addsign *.rpm
     artifacts:
       paths:
         - ${PACKAGE_NAME}-*.rpm

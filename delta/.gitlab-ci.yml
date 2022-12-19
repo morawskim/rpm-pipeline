@@ -31,10 +31,15 @@ rpm.delta:
     only:
       changes:
         - "delta/*"
+    before_script:
+      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
     script:
       - |
         cat > ~/.rpmmacros << EOF
         %packager Marcin Morawski <marcin@morawskim.pl>
+        %_signature gpg
+        %_gpg_name morawskim Signing Key
         %vendor morawskim
         EOF
       - >
@@ -48,6 +53,7 @@ rpm.delta:
         delta-${VERSION}/completion/bash/completion.sh=/etc/bash-completion/completions/delta.sh
         delta-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
         delta-${VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/
+      - rpm --addsign *.rpm
     artifacts:
       paths:
         - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

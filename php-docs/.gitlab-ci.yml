@@ -34,11 +34,16 @@ rpm:
     only:
       changes:
         - "php-docs/*"
+    before_script:
+      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
     script:
       - VERSION=$(date +\%Y\%m\%d)
       - |
         cat > ~/.rpmmacros << EOF
         %packager Marcin Morawski <marcin@morawskim.pl>
+        %_signature gpg
+        %_gpg_name morawskim Signing Key
         %vendor morawskim
         EOF
       - >
@@ -53,6 +58,7 @@ rpm:
         doc-en/doc-base/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/
         docs/man/php-functions/=/opt/php/docs/man/man3
         docs/xhtml/php-chunked-xhtml/=/opt/php/docs/xhtml
+      - rpm --addsign *.rpm
     artifacts:
       paths:
         - ${PACKAGE_NAME}-*.noarch.rpm

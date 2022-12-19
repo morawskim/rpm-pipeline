@@ -32,10 +32,15 @@ rpm.yadm:
     only:
       changes:
         - "yadm/*"
+    before_script:
+      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
     script:
       - |
         cat > ~/.rpmmacros << EOF
         %packager Marcin Morawski <marcin@morawskim.pl>
+        %_signature gpg
+        %_gpg_name morawskim Signing Key
         %vendor morawskim
         EOF
       - cat ~/.rpmmacros
@@ -54,6 +59,7 @@ rpm.yadm:
         ./yadm-${YADM_VERSION}/yadm.1=/usr/share/man/man1/${PACKAGE_NAME}.1
         ./yadm-${YADM_VERSION}/completion/bash/yadm=/etc/bash_completion.d/${PACKAGE_NAME}
         ./yadm-${YADM_VERSION}/docs=/usr/share/doc/packages/${PACKAGE_NAME}
+      - rpm --addsign *.rpm
     artifacts:
       paths:
         - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm

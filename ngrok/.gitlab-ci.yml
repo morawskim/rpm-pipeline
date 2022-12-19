@@ -28,10 +28,15 @@ rpm.ngrok:
     only:
       changes:
         - "ngrok/*"
+    before_script:
+      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
     script:
       - |
         cat > ~/.rpmmacros << EOF
         %packager Marcin Morawski <marcin@morawskim.pl>
+        %_signature gpg
+        %_gpg_name morawskim Signing Key
         %vendor morawskim
         EOF
       - cat ~/.rpmmacros
@@ -44,6 +49,7 @@ rpm.ngrok:
         --license 'Commercial'
         --url https://ngrok.com
         ./ngrok-bin/ngrok=/usr/bin/
+      - rpm --addsign *.rpm
     artifacts:
       paths:
         - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

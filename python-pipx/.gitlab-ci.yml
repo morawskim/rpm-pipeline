@@ -10,10 +10,15 @@ rpm:
   image:
     name: opensuse/tumbleweed
     entrypoint: ["/bin/bash", "-c"]
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
     - |
       cat > ~/.rpmmacros << EOF
       %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
       %vendor morawskim
       EOF
     - cat ~/.rpmmacros
@@ -22,6 +27,7 @@ rpm:
     - rpmdev-spectool --all --get-files --directory rpmbuild/SOURCES/ --define 'is_spectool 1' ${SPECFILE}
     - rpmbuild -ba --define="_topdir $PWD/rpmbuild" ${SPECFILE}
     - mv rpmbuild/RPMS/noarch/python*-pipx-*.noarch.rpm .
+    - rpm --addsign *.rpm
   only:
     changes:
       - "python-pipx/*"
