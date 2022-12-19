@@ -8,7 +8,7 @@ variables:
 
 compile:
   stage: build
-  image: rust:1.45
+  image: rust:1.50
   script:
     - wget -Oxsv.tar.gz https://github.com/BurntSushi/xsv/archive/${VERSION}.tar.gz
     - tar xvzf xsv.tar.gz

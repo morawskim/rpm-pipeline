@@ -3,7 +3,7 @@ variables:
 
 compile.hyperfine:
   stage: build
-  image: rust:1.44
+  image: rust:1.50
   script:
     - wget -Ohyperfine.tar.gz https://github.com/sharkdp/hyperfine/archive/v${HYPERFINE_VERSION}.tar.gz
     - tar xvzf hyperfine.tar.gz

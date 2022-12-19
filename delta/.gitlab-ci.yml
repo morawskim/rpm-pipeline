@@ -1,6 +1,6 @@
 compile.delta:
   stage: build
-  image: rust:1.44
+  image: rust:1.50
   variables:
     VERSION: '0.1.1'
   script:
