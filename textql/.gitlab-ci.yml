@@ -1,21 +1,18 @@
 variables:
-  TEXTQL_VERSION: '2.0.3.20200608'
+  TEXTQL_RELEASE: '2.0.3.20221220'
+  TEXTQL_REVISION: fca00ecc76c8
+  TEXTQL_VERSION: '2.0.3'
 
 compile.textql:
   stage: build
   image: golang:1.14
   script:
-    - go get -u github.com/dinedal/textql/...
-    - pushd /go/src/github.com/dinedal/textql
-    - git checkout 250cf763f52c2045148f7447d88688e0555b1227
-    - go build -ldflags "-X main.VERSION=`cat VERSION` -s" -o ./build/textql ./textql/main.go
+    - GO111MODULE=on go get -ldflags "-X main.VERSION=${TEXTQL_VERSION}-${TEXTQL_REVISION} -s"  github.com/dinedal/textql/...@${TEXTQL_REVISION}
     - mkdir -p textql
-    - popd
-    - mkdir -p textql
-    - mv /go/src/github.com/dinedal/textql/build/textql ./textql/
-    - cp -vr /go/src/github.com/dinedal/textql/LICENSE ./textql/
-    - cp -vr /go/src/github.com/dinedal/textql/Readme.md ./textql/
-    - cp -vr /go/src/github.com/dinedal/textql/man/textql.1 ./textql/
+    - mv /go/bin/textql ./textql/
+    - cp -vr /go/pkg/mod/github.com/dinedal/textql\@*/LICENSE ./textql/
+    - cp -vr /go/pkg/mod/github.com/dinedal/textql\@*/Readme.md ./textql/
+    - cp -vr /go/pkg/mod/github.com/dinedal/textql\@*/man/textql.1 ./textql/
   only:
     changes:
       - "textql/*"
@@ -28,7 +25,7 @@ rpm.textql:
     image: alanfranz/fpm-within-docker:centos-7
     variables:
       PACKAGE_NAME: 'textql'
-      VERSION: $TEXTQL_VERSION
+      VERSION: $TEXTQL_RELEASE
     dependencies:
       - compile.textql
     only:
