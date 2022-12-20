@@ -1,17 +1,13 @@
 variables:
-  LICENSE_VERSION: 5.0.0
+  LICENSE_VERSION: 5.0.4
 
 compile.license:
   stage: build
-  image: golang:1.14
+  image: golang:1.19
   script:
-    - go get github.com/nishanths/license
-    - pushd /go/src/github.com/nishanths/license
-    - git checkout v${LICENSE_VERSION}
-    - go build .
-    - popd
+    - go install github.com/nishanths/license/v5@v${LICENSE_VERSION}
     - mkdir -p bin
-    - mv /go/src/github.com/nishanths/license/license ./bin/
+    - mv /go/bin/license ./bin/
   only:
     changes:
       - "license/*"
