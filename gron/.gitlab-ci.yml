@@ -1,18 +1,14 @@
 variables:
-  GRON_VERSION: '0.6.0'
+  GRON_VERSION: '0.7.1'
 
 compile.gron:
   stage: build
-  image: golang:1.14
+  image: golang:1.19
   script:
-    - go get -u github.com/tomnomnom/gron
-    - pushd /go/src/github.com/tomnomnom/gron
-    - git checkout v${GRON_VERSION}
-    - go build ./...
-    - popd
+    - go install github.com/tomnomnom/gron@v${GRON_VERSION}
     - mkdir -p gron-${GRON_VERSION}
-    - mv /go/src/github.com/tomnomnom/gron/gron gron-${GRON_VERSION}/gron
-    - cp /go/src/github.com/tomnomnom/gron/{README.mkd,LICENSE,ADVANCED.mkd,CHANGELOG.mkd}  gron-${GRON_VERSION}
+    - mv /go/bin/gron gron-${GRON_VERSION}/gron
+    - cp /go/pkg/mod/github.com/tomnomnom/gron\@v${GRON_VERSION}/{README.mkd,LICENSE,ADVANCED.mkd,CHANGELOG.mkd}  gron-${GRON_VERSION}
   only:
     changes:
       - "gron/*"
