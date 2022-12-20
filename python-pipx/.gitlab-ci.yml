@@ -22,7 +22,7 @@ rpm:
       %vendor morawskim
       EOF
     - cat ~/.rpmmacros
-    - zypper --non-interactive in python-rpm-macros python2-devel python3-devel python2-setuptools python3-setuptools fdupes rpmdevtools rpm-build python36-devel python36-setuptools python39-devel python39-setuptools
+    - zypper --non-interactive in python-rpm-macros python2-setuptools fdupes rpmdevtools rpm-build python38-devel python38-setuptools python39-devel python39-setuptools python310-devel python310-setuptools
     - mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
     - rpmdev-spectool --all --get-files --directory rpmbuild/SOURCES/ --define 'is_spectool 1' ${SPECFILE}
     - rpmbuild -ba --define="_topdir $PWD/rpmbuild" ${SPECFILE}
