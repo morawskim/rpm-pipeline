@@ -1,5 +1,8 @@
 Piplelines to build rpm packages.
 
+RPM packages are signed via [key](https://gist.githubusercontent.com/morawskim/0e5d812efbacc894a179516cd8dbca60/raw/2efa2ae80a2feb03f13952bdc07a47383592f972/RPM-GPG-KEY)
+and  available at [http://rpm.morawskim.pl/openSUSE_Factory/](http://rpm.morawskim.pl/openSUSE_Factory/)
+
 `delta` - [Delta](https://github.com/dandavison/delta) provides language syntax-highlighting, within-line insertion/deletion detection, and restructured diff output for git on the command line.
 
 `docker-credential-helpers` - [docker-credential-helpers](https://github.com/docker/docker-credential-helpers) is a suite of programs to use native stores to keep Docker credentials safe
