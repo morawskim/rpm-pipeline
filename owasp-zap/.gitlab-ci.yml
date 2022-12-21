@@ -4,41 +4,41 @@ stages:
 variables:
   PACKAGE_NAME: 'owasp-zap'
   VERSION: '2.7.0'
-  OWASP_DIR:  /usr/share/owasp-zap
+  OWASP_DIR: /usr/share/owasp-zap
 
 rpm:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    only:
-      changes:
-        - "owasp-zap/*"
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - curl -L --output zaproxy.tar.gz https://github.com/zaproxy/zaproxy/releases/download/${VERSION}/ZAP_${VERSION}_Linux.tar.gz
-      - tar xzvf zaproxy.tar.gz
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - cat ~/.rpmmacros
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description "The Zed Attack Proxy (ZAP) is an easy to use integrated penetration testing tool for finding vulnerabilities in web applications. It is designed to be used by people with a wide range of security experience and as such is ideal for developers and functional testers who are new to penetration testing. ZAP provides automated scanners as well as a set of tools that allow you to find security vulnerabilities manually."
-        --rpm-summary 'Zed Attack Proxy'
-        --vendor morawskim
-        --license 'Apachev2'
-        -a all
-        --depends java-1_8_0-openjdk
-        --url http://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project
-        ./ZAP_${VERSION}/=${OWASP_DIR}
-        owasp-zap/owasp-zap.desktop=/usr/share/applications/
-        owasp-zap/owasp-zap.png=/usr/share/pixmaps/
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-*.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  only:
+    changes:
+      - "owasp-zap/*"
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - curl -L --output zaproxy.tar.gz https://github.com/zaproxy/zaproxy/releases/download/${VERSION}/ZAP_${VERSION}_Linux.tar.gz
+    - tar xzvf zaproxy.tar.gz
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description "The Zed Attack Proxy (ZAP) is an easy to use integrated penetration testing tool for finding vulnerabilities in web applications. It is designed to be used by people with a wide range of security experience and as such is ideal for developers and functional testers who are new to penetration testing. ZAP provides automated scanners as well as a set of tools that allow you to find security vulnerabilities manually."
+      --rpm-summary 'Zed Attack Proxy'
+      --vendor morawskim
+      --license 'Apachev2'
+      -a all
+      --depends java-1_8_0-openjdk
+      --url http://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project
+      ./ZAP_${VERSION}/=${OWASP_DIR}
+      owasp-zap/owasp-zap.desktop=/usr/share/applications/
+      owasp-zap/owasp-zap.png=/usr/share/pixmaps/
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-*.rpm

@@ -35,45 +35,45 @@ compile.git-extras:
       - git-extras-artifacts/
 
 rpm.git-extras:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    variables:
-      PACKAGE_NAME: 'git-extras'
-      VERSION: $GIT_EXTRAS_VERSION
-    dependencies:
-      - compile.git-extras
-    only:
-      changes:
-        - "git-extras/*"
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - cat ~/.rpmmacros
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description 'git-extras adds the following extra-commands to git: alias, archive-file, bug, changelog, commits-since, contrib, count, create-branch, delete-branch, delete-submodule, delete-tag, effort, extras, feature, fresh-branch, gh-pages, graft, ignore, info, local-commits, obliterate, promote, refactor, release, repl, setup, squash, summary, touch, undo For more information about the extra-commands, see the included README.md, HTML, mark-down or man-pages.'
-        --rpm-summary 'Little git extras'
-        --vendor morawskim
-        --license 'MIT'
-        --url https://github.com/tj/git-extras
-        -a all
-        --depends git
-        --depends bash-completion
-        git-extras-artifacts/bin/=/usr/bin/
-        git-extras-artifacts/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
-        git-extras-artifacts/share/man/man1/=/usr/share/man/man1/
-        git-extras-artifacts/bash_completion.d/=/etc/bash_completion.d/
-        git-extras-artifacts/Commands.md=/usr/share/doc/packages/${PACKAGE_NAME}/Commands.md
-        git-extras-artifacts/Readme.md=/usr/share/doc/packages/${PACKAGE_NAME}/Readme.md
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  variables:
+    PACKAGE_NAME: 'git-extras'
+    VERSION: $GIT_EXTRAS_VERSION
+  dependencies:
+    - compile.git-extras
+  only:
+    changes:
+      - "git-extras/*"
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description 'git-extras adds the following extra-commands to git: alias, archive-file, bug, changelog, commits-since, contrib, count, create-branch, delete-branch, delete-submodule, delete-tag, effort, extras, feature, fresh-branch, gh-pages, graft, ignore, info, local-commits, obliterate, promote, refactor, release, repl, setup, squash, summary, touch, undo For more information about the extra-commands, see the included README.md, HTML, mark-down or man-pages.'
+      --rpm-summary 'Little git extras'
+      --vendor morawskim
+      --license 'MIT'
+      --url https://github.com/tj/git-extras
+      -a all
+      --depends git
+      --depends bash-completion
+      git-extras-artifacts/bin/=/usr/bin/
+      git-extras-artifacts/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+      git-extras-artifacts/share/man/man1/=/usr/share/man/man1/
+      git-extras-artifacts/bash_completion.d/=/etc/bash_completion.d/
+      git-extras-artifacts/Commands.md=/usr/share/doc/packages/${PACKAGE_NAME}/Commands.md
+      git-extras-artifacts/Readme.md=/usr/share/doc/packages/${PACKAGE_NAME}/Readme.md
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm

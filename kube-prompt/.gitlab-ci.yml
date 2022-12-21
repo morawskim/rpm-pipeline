@@ -30,31 +30,31 @@ compile:
       - kube-prompt-${VERSION}/LICENSE
 
 rpm:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    dependencies:
-      - compile
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description 'An interactive kubernetes client featuring auto-complete.'
-        --vendor morawskim
-        --license MIT
-        --url https://github.com/c-bata/kube-prompt
-        kube-prompt-${VERSION}/kube-prompt=/usr/bin/
-        kube-prompt-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
-        kube-prompt-${VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  dependencies:
+    - compile
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description 'An interactive kubernetes client featuring auto-complete.'
+      --vendor morawskim
+      --license MIT
+      --url https://github.com/c-bata/kube-prompt
+      kube-prompt-${VERSION}/kube-prompt=/usr/bin/
+      kube-prompt-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+      kube-prompt-${VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

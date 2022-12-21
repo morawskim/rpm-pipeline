@@ -21,39 +21,39 @@ compile.dive:
       - dive-${DIVE_VERSION}/
 
 rpm.dive:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    variables:
-      PACKAGE_NAME: 'dive'
-      VERSION: $DIVE_VERSION
-    dependencies:
-      - compile.dive
-    only:
-      changes:
-        - "dive/*"
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - cat ~/.rpmmacros
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description 'A tool for exploring a docker image, layer contents, and discovering ways to shrink the size of your Docker/OCI image.'
-        --rpm-summary 'A tool for exploring a docker image, layer contents, and discovering ways to shrink the size of your Docker/OCI image.'
-        --vendor morawskim
-        --license 'MIT'
-        --url https://github.com/wagoodman/dive
-        ./dive-${DIVE_VERSION}/dive=/usr/bin/
-        ./dive-${DIVE_VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
-        ./dive-${DIVE_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-*.x86_64.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  variables:
+    PACKAGE_NAME: 'dive'
+    VERSION: $DIVE_VERSION
+  dependencies:
+    - compile.dive
+  only:
+    changes:
+      - "dive/*"
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description 'A tool for exploring a docker image, layer contents, and discovering ways to shrink the size of your Docker/OCI image.'
+      --rpm-summary 'A tool for exploring a docker image, layer contents, and discovering ways to shrink the size of your Docker/OCI image.'
+      --vendor morawskim
+      --license 'MIT'
+      --url https://github.com/wagoodman/dive
+      ./dive-${DIVE_VERSION}/dive=/usr/bin/
+      ./dive-${DIVE_VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
+      ./dive-${DIVE_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-*.x86_64.rpm

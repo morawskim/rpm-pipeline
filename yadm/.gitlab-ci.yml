@@ -22,44 +22,44 @@ compile.yadm:
       - yadm-${YADM_VERSION}/yadm
 
 rpm.yadm:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    variables:
-      PACKAGE_NAME: 'yadm'
-      VERSION: $YADM_VERSION
-    dependencies:
-      - compile.yadm
-    only:
-      changes:
-        - "yadm/*"
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - cat ~/.rpmmacros
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description 'yadm is a dotfile management tool with 3 main features: Manages files across systems using a single Git repository. Provides a way to use alternate files on a specific OS or host. Supplies a method of encrypting confidential data so it can safely be stored in your repository'
-        --rpm-summary 'Yet Another Dotfiles Manager'
-        --vendor morawskim
-        --license 'GPLv3'
-        --url https://github.com/TheLocehiliosan/yadm
-        -a all
-        --depends git
-        --depends bash
-        ./yadm-${YADM_VERSION}/yadm=/usr/bin/
-        ./yadm-${YADM_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
-        ./yadm-${YADM_VERSION}/yadm.1=/usr/share/man/man1/${PACKAGE_NAME}.1
-        ./yadm-${YADM_VERSION}/completion/bash/yadm=/etc/bash_completion.d/${PACKAGE_NAME}
-        ./yadm-${YADM_VERSION}/docs=/usr/share/doc/packages/${PACKAGE_NAME}
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  variables:
+    PACKAGE_NAME: 'yadm'
+    VERSION: $YADM_VERSION
+  dependencies:
+    - compile.yadm
+  only:
+    changes:
+      - "yadm/*"
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description 'yadm is a dotfile management tool with 3 main features: Manages files across systems using a single Git repository. Provides a way to use alternate files on a specific OS or host. Supplies a method of encrypting confidential data so it can safely be stored in your repository'
+      --rpm-summary 'Yet Another Dotfiles Manager'
+      --vendor morawskim
+      --license 'GPLv3'
+      --url https://github.com/TheLocehiliosan/yadm
+      -a all
+      --depends git
+      --depends bash
+      ./yadm-${YADM_VERSION}/yadm=/usr/bin/
+      ./yadm-${YADM_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+      ./yadm-${YADM_VERSION}/yadm.1=/usr/share/man/man1/${PACKAGE_NAME}.1
+      ./yadm-${YADM_VERSION}/completion/bash/yadm=/etc/bash_completion.d/${PACKAGE_NAME}
+      ./yadm-${YADM_VERSION}/docs=/usr/share/doc/packages/${PACKAGE_NAME}
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm

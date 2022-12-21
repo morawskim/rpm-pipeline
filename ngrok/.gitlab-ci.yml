@@ -18,38 +18,38 @@ compile.ngrok:
       - ngrok-bin/ngrok
 
 rpm.ngrok:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    variables:
-      PACKAGE_NAME: 'ngrok-client'
-      VERSION: $NGROK_VERSION
-    dependencies:
-      - compile.ngrok
-    only:
-      changes:
-        - "ngrok/*"
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - cat ~/.rpmmacros
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description 'ngrok creates a tunnel from the public internet to a port on your local machine. You can give this URL to anyone to allow them to try out a web site you are developing without doing any deployment. It captures all traffic through the tunnel. It displays information about the HTTP traffic for your inspection. Raw request/response bytes, parsed headers and form data, JSON/XML syntax checking and more are included. It can also replay requests. By default, ngrok will use ngrok.com as a third-party relay. This service is provided at no-cost and without registration but it is possible to get additional features by signing up in the service (which is pay-as-you-want kind). However, it is possible to setup and use its own server. This package installs the client part of ngrok. It can be used directly with ngrok.com service or with your own server if you install the ngrok-server package.'
-        --rpm-summary 'Secure tunnels to localhost'
-        --provides ngrok
-        --vendor morawskim
-        --license 'Commercial'
-        --url https://ngrok.com
-        ./ngrok-bin/ngrok=/usr/bin/
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  variables:
+    PACKAGE_NAME: 'ngrok-client'
+    VERSION: $NGROK_VERSION
+  dependencies:
+    - compile.ngrok
+  only:
+    changes:
+      - "ngrok/*"
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description 'ngrok creates a tunnel from the public internet to a port on your local machine. You can give this URL to anyone to allow them to try out a web site you are developing without doing any deployment. It captures all traffic through the tunnel. It displays information about the HTTP traffic for your inspection. Raw request/response bytes, parsed headers and form data, JSON/XML syntax checking and more are included. It can also replay requests. By default, ngrok will use ngrok.com as a third-party relay. This service is provided at no-cost and without registration but it is possible to get additional features by signing up in the service (which is pay-as-you-want kind). However, it is possible to setup and use its own server. This package installs the client part of ngrok. It can be used directly with ngrok.com service or with your own server if you install the ngrok-server package.'
+      --rpm-summary 'Secure tunnels to localhost'
+      --provides ngrok
+      --vendor morawskim
+      --license 'Commercial'
+      --url https://ngrok.com
+      ./ngrok-bin/ngrok=/usr/bin/
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

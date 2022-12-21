@@ -21,39 +21,39 @@ compile.xrectsel:
       - xrectsel-${XRECTSEL_VERSION}
 
 rpm.xrectsel:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    variables:
-      PACKAGE_NAME: 'xrectsel'
-      VERSION: $XRECTSEL_VERSION
-    dependencies:
-      - compile.xrectsel
-    only:
-      changes:
-        - "xrectsel/*"
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - cat ~/.rpmmacros
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description "Select a screen area with mouse and return the geometry of this area"
-        --rpm-summary "Select a screen area with mouse and return the geometry of this area"
-        --vendor morawskim
-        --license 'BSD'
-        --url https://bbs.archlinux.org/viewtopic.php?id=85378
-        --depends libX11-6
-        ./xrectsel-${XRECTSEL_VERSION}/usr/bin/xrectsel=/usr/bin/
-        ./xrectsel-${XRECTSEL_VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  variables:
+    PACKAGE_NAME: 'xrectsel'
+    VERSION: $XRECTSEL_VERSION
+  dependencies:
+    - compile.xrectsel
+  only:
+    changes:
+      - "xrectsel/*"
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description "Select a screen area with mouse and return the geometry of this area"
+      --rpm-summary "Select a screen area with mouse and return the geometry of this area"
+      --vendor morawskim
+      --license 'BSD'
+      --url https://bbs.archlinux.org/viewtopic.php?id=85378
+      --depends libX11-6
+      ./xrectsel-${XRECTSEL_VERSION}/usr/bin/xrectsel=/usr/bin/
+      ./xrectsel-${XRECTSEL_VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

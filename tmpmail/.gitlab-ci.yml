@@ -16,44 +16,44 @@ compile.tmpmail:
       - tmpmail-master/tmpmail
 
 rpm.tmpmail:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    variables:
-      PACKAGE_NAME: 'tmpmail'
-    dependencies:
-      - compile.tmpmail
-    only:
-      changes:
-        - "tmpmail/*"
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - VERSION=$(grep 'VERSION=' ./tmpmail-master/tmpmail | grep -P -o '([\d]+\.[\d]+\.[\d]+)')
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - cat ~/.rpmmacros
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description 'tmpmail is a command line utility that allows you to create a temporary email address and receive emails to the temporary email address. It uses 1secmail API to receive the emails.'
-        --rpm-summary 'A temporary email right from your terminal'
-        --vendor morawskim
-        --license 'MIT'
-        --url https://github.com/sdushantha/tmpmail
-        -a all
-        --depends w3m
-        --depends curl
-        --depends jq
-        --depends awk
-        ./tmpmail-master/tmpmail=/usr/bin/
-        ./tmpmail-master/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
-        ./tmpmail-master/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-*.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  variables:
+    PACKAGE_NAME: 'tmpmail'
+  dependencies:
+    - compile.tmpmail
+  only:
+    changes:
+      - "tmpmail/*"
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - VERSION=$(grep 'VERSION=' ./tmpmail-master/tmpmail | grep -P -o '([\d]+\.[\d]+\.[\d]+)')
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description 'tmpmail is a command line utility that allows you to create a temporary email address and receive emails to the temporary email address. It uses 1secmail API to receive the emails.'
+      --rpm-summary 'A temporary email right from your terminal'
+      --vendor morawskim
+      --license 'MIT'
+      --url https://github.com/sdushantha/tmpmail
+      -a all
+      --depends w3m
+      --depends curl
+      --depends jq
+      --depends awk
+      ./tmpmail-master/tmpmail=/usr/bin/
+      ./tmpmail-master/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+      ./tmpmail-master/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-*.rpm

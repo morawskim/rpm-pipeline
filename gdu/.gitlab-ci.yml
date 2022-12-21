@@ -6,13 +6,13 @@ variables:
   VERSION: '5.12.0'
 
 rpm:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    only:
-      changes:
-        - "gdu/*"
-    script:
-      - curl -L --output ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm https://github.com/dundee/gdu/releases/download/v5.12.0/gdu-${VERSION}-1.x86_64.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  only:
+    changes:
+      - "gdu/*"
+  script:
+    - curl -L --output ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm https://github.com/dundee/gdu/releases/download/v5.12.0/gdu-${VERSION}-1.x86_64.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

@@ -11,7 +11,7 @@ rpm:
   stage: build
   image:
     name: morawskim/opensuse-leap-debug:15.0.2020-11-13
-    entrypoint: ["/bin/bash", "-c"]
+    entrypoint: [ "/bin/bash", "-c" ]
   before_script:
     - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
     - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust

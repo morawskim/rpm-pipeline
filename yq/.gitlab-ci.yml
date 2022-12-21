@@ -24,35 +24,35 @@ compile:
       - yq-${VERSION}/LICENSE
 
 rpm:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    dependencies:
-      - compile
-    only:
-      changes:
-        - "yq/*"
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description 'a lightweight and portable command-line YAML processor. yq uses jq like syntax but works with yaml files as well as json. It does not yet support everything jq does - but it does support the most common operations and functions, and more is being added continuously.'
-        --rpm-summary 'yq is a portable command-line YAML processor'
-        --vendor morawskim
-        --license MIT
-        --url https://github.com/mikefarah/yq
-        yq-${VERSION}/yq=/usr/bin/
-        yq-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
-        yq-${VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  dependencies:
+    - compile
+  only:
+    changes:
+      - "yq/*"
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description 'a lightweight and portable command-line YAML processor. yq uses jq like syntax but works with yaml files as well as json. It does not yet support everything jq does - but it does support the most common operations and functions, and more is being added continuously.'
+      --rpm-summary 'yq is a portable command-line YAML processor'
+      --vendor morawskim
+      --license MIT
+      --url https://github.com/mikefarah/yq
+      yq-${VERSION}/yq=/usr/bin/
+      yq-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
+      yq-${VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

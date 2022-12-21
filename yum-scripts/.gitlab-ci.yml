@@ -37,39 +37,39 @@ compile.yum-scripts:
       - yum-utils-yum-utils-${YUM_SCRIPT_VERSION}/yum-scripts-build-root
 
 rpm.yum-scripts:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    variables:
-      PACKAGE_NAME: 'yum-scripts'
-      VERSION: $YUM_SCRIPT_VERSION
-    dependencies:
-      - compile.yum-scripts
-    only:
-      changes:
-        - "yum-scripts/*"
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - cat ~/.rpmmacros
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description 'yum-utils is a collection of utilities and examples for the yum package manager. It includes utilities by different authors that make yum easier and more powerful to use. Authors: --------     Gijs Hollestelle <gijs@gewis.nl>     Seth Vidal <skvidal@phy.duke.edu>     Panu Matilainen <pmatilai@laiskiainen.org>     Sean Dilda <sean@duke.edu>'
-        --rpm-summary 'Utilities based around the yum package manager'
-        --vendor morawskim
-        --license 'GPL-2.0+'
-        --url http://linux.duke.edu/yum/download/yum-utils/
-        -a all
-        --conflicts yum-utils
-        ./yum-utils-yum-utils-${YUM_SCRIPT_VERSION}/yum-scripts-build-root=/
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  variables:
+    PACKAGE_NAME: 'yum-scripts'
+    VERSION: $YUM_SCRIPT_VERSION
+  dependencies:
+    - compile.yum-scripts
+  only:
+    changes:
+      - "yum-scripts/*"
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description 'yum-utils is a collection of utilities and examples for the yum package manager. It includes utilities by different authors that make yum easier and more powerful to use. Authors: --------     Gijs Hollestelle <gijs@gewis.nl>     Seth Vidal <skvidal@phy.duke.edu>     Panu Matilainen <pmatilai@laiskiainen.org>     Sean Dilda <sean@duke.edu>'
+      --rpm-summary 'Utilities based around the yum package manager'
+      --vendor morawskim
+      --license 'GPL-2.0+'
+      --url http://linux.duke.edu/yum/download/yum-utils/
+      -a all
+      --conflicts yum-utils
+      ./yum-utils-yum-utils-${YUM_SCRIPT_VERSION}/yum-scripts-build-root=/
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm

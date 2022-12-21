@@ -18,42 +18,42 @@ compile.json-tools:
       - json-tools-${JSON_TOOLS_COMMIT}/jsonx
 
 rpm.json-tools:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    variables:
-      PACKAGE_NAME: 'json-tools'
-      VERSION: $JSON_TOOLS_VERSION
-    dependencies:
-      - compile.json-tools
-    only:
-      changes:
-        - "json-tools/*"
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - cat ~/.rpmmacros
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description 'This is a small set of utilities for interacting with JSON on the command line. I find it particularly useful for working with JSON-enabled REST APIs -- such as those used by OpenStack -- on the command line.'
-        --rpm-summary 'JSON Utilities'
-        --vendor morawskim
-        --url https://github.com/larsks/json-tools
-        -a all
-        --depends python-dpath
-        --provides jsong
-        --provides jsonx
-        ./json-tools-${JSON_TOOLS_COMMIT}/jsong=/usr/bin/
-        ./json-tools-${JSON_TOOLS_COMMIT}/jsonx=/usr/bin/
-        ./json-tools-${JSON_TOOLS_COMMIT}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  variables:
+    PACKAGE_NAME: 'json-tools'
+    VERSION: $JSON_TOOLS_VERSION
+  dependencies:
+    - compile.json-tools
+  only:
+    changes:
+      - "json-tools/*"
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description 'This is a small set of utilities for interacting with JSON on the command line. I find it particularly useful for working with JSON-enabled REST APIs -- such as those used by OpenStack -- on the command line.'
+      --rpm-summary 'JSON Utilities'
+      --vendor morawskim
+      --url https://github.com/larsks/json-tools
+      -a all
+      --depends python-dpath
+      --provides jsong
+      --provides jsonx
+      ./json-tools-${JSON_TOOLS_COMMIT}/jsong=/usr/bin/
+      ./json-tools-${JSON_TOOLS_COMMIT}/jsonx=/usr/bin/
+      ./json-tools-${JSON_TOOLS_COMMIT}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm

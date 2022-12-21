@@ -27,40 +27,40 @@ compile.journalcheck:
       - journalcheck/
 
 rpm.journalcheck:
-    stage: package
-    image: alanfranz/fpm-within-docker:centos-7
-    variables:
-      PACKAGE_NAME: 'journalcheck'
-      VERSION: $JOURNALCHECK_VERSION
-    dependencies:
-      - compile.journalcheck
-    only:
-      changes:
-        - "journalcheck/*"
-    before_script:
-      - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-      - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
-    script:
-      - |
-        cat > ~/.rpmmacros << EOF
-        %packager Marcin Morawski <marcin@morawskim.pl>
-        %_signature gpg
-        %_gpg_name morawskim Signing Key
-        %vendor morawskim
-        EOF
-      - cat ~/.rpmmacros
-      - >
-        fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-        --description 'Journalcheck is a simple utility which sends mails of possibly interesting journal entries to a configurable e-mail address. Journal entries are marked as not interesting by matching a regular expression, a list of which can be provided in a file, one per line. This is very similar in operation to logcheck, except it operates on the journal instead of plain text log files.'
-        --rpm-summary 'Like logcheck, but for journald'
-        --vendor morawskim
-        --license 'GPL-3'
-        --url https://github.com/jorgenschaefer/journalcheck
-        ./journalcheck/journalcheck=/usr/bin/
-        ./journalcheck/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
-        ./journalcheck/example=/usr/share/doc/packages/${PACKAGE_NAME}/
-        ./journalcheck/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
-      - rpm --addsign *.rpm
-    artifacts:
-      paths:
-        - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  variables:
+    PACKAGE_NAME: 'journalcheck'
+    VERSION: $JOURNALCHECK_VERSION
+  dependencies:
+    - compile.journalcheck
+  only:
+    changes:
+      - "journalcheck/*"
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+  script:
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+    - cat ~/.rpmmacros
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
+      --description 'Journalcheck is a simple utility which sends mails of possibly interesting journal entries to a configurable e-mail address. Journal entries are marked as not interesting by matching a regular expression, a list of which can be provided in a file, one per line. This is very similar in operation to logcheck, except it operates on the journal instead of plain text log files.'
+      --rpm-summary 'Like logcheck, but for journald'
+      --vendor morawskim
+      --license 'GPL-3'
+      --url https://github.com/jorgenschaefer/journalcheck
+      ./journalcheck/journalcheck=/usr/bin/
+      ./journalcheck/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
+      ./journalcheck/example=/usr/share/doc/packages/${PACKAGE_NAME}/
+      ./journalcheck/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+    - rpm --addsign *.rpm
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm
