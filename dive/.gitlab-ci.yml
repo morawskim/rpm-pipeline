@@ -1,20 +1,22 @@
 include: '/.gitlab/job-templates.yml'
 
 variables:
-  DIVE_VERSION: '0.9.2'
+  DIVE_VERSION: '0.10.0'
 
 compile.dive:
   stage: build
   image: golang:1.14
   script:
-    - go get -u github.com/wagoodman/dive
-    - pushd /go/src/github.com/wagoodman/dive
+    # see: https://github.com/wagoodman/dive/issues/361 and https://github.com/wagoodman/dive/issues/392
+    - git clone https://github.com/wagoodman/dive.git dive-repository
+    - pushd dive-repository
     - git checkout v${DIVE_VERSION}
+    - go install .
     - make build
     - popd
     - mkdir -p dive-${DIVE_VERSION}
-    - mv /go/src/github.com/wagoodman/dive/dist/dive_linux_amd64/dive dive-${DIVE_VERSION}/dive
-    - cp /go/src/github.com/wagoodman/dive/LICENSE /go/src/github.com/wagoodman/dive/README.md dive-${DIVE_VERSION}
+    - mv dive-repository/dist/dive_linux_amd64/dive dive-${DIVE_VERSION}/dive
+    - cp dive-repository/LICENSE dive-repository/README.md dive-${DIVE_VERSION}
   only:
     changes:
       - "dive/*"
