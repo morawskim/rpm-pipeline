@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
@@ -13,21 +15,11 @@ variables:
   SPECFILE: 'fluent-bit.spec'
 
 rpm:
-  stage: package
+  extends: .rpm-template
   image:
     name: morawskim/opensuse-leap-debug:15.3
     entrypoint: [ "/bin/bash", "-c" ]
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - zypper --non-interactive in cmake wget gcc-c++ flex bison rpmdevtools systemd-devel zlib-devel
     - pushd fluent-bit
@@ -35,7 +27,6 @@ rpm:
     - rpmdev-spectool --all --get-files --directory ./ ${SPECFILE}
     - rpmbuild -ba --define="_sourcedir $PWD" --define="_topdir $PWD/rpmbuild" ${SPECFILE}
     - mv rpmbuild/RPMS/x86_64/fluent-bit-*.x86_64.rpm .
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - fluent-bit/fluent-bit-*.x86_64.rpm

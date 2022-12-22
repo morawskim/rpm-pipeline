@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 variables:
   TEXTQL_RELEASE: '2.0.3.20221220'
   TEXTQL_REVISION: fca00ecc76c8
@@ -21,8 +23,7 @@ compile.textql:
       - textql/
 
 rpm.textql:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   variables:
     PACKAGE_NAME: 'textql'
     VERSION: $TEXTQL_RELEASE
@@ -31,17 +32,7 @@ rpm.textql:
   only:
     changes:
       - "textql/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
@@ -54,7 +45,6 @@ rpm.textql:
       ./textql/Readme.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
       ./textql/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
       ./textql/textql.1=/usr/share/man/man1/textql.1
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

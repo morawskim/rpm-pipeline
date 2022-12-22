@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 stages:
   - build
   - package
@@ -8,28 +10,18 @@ variables:
   SPECFILE: 'krunner-skypeforlinux/krunner-skypeforlinux.spec'
 
 rpm:
+  extends: .rpm-template
   stage: build
   image:
     name: morawskim/opensuse-leap-debug:15.0.2020-11-13
     entrypoint: [ "/bin/bash", "-c" ]
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - zypper --non-interactive in cmake krunner-devel ktextwidgets-devel extra-cmake-modules rpmdevtools rpm-build
     - mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
     - rpmdev-spectool --all --get-files --directory rpmbuild/SOURCES/ ${SPECFILE}
     - rpmbuild -ba --define="_topdir $PWD/rpmbuild" ${SPECFILE}
     - mv rpmbuild/RPMS/x86_64/krunner-skypeforlinux-*.x86_64.rpm .
-    - rpm --addsign *.rpm
   only:
     changes:
       - "krunner-skypeforlinux/*"

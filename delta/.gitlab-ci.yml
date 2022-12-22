@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 compile.delta:
   stage: build
   image: rust:1.50
@@ -21,8 +23,7 @@ compile.delta:
       - delta-${VERSION}/README.md
 
 rpm.delta:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   variables:
     PACKAGE_NAME: 'git-delta'
     VERSION: '0.1.1'
@@ -31,17 +32,7 @@ rpm.delta:
   only:
     changes:
       - "delta/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
       --description 'Delta provides language syntax-highlighting, within-line insertion/deletion detection, and restructured diff output for git on the command line.'
@@ -53,7 +44,6 @@ rpm.delta:
       delta-${VERSION}/completion/bash/completion.sh=/etc/bash-completion/completions/delta.sh
       delta-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
       delta-${VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

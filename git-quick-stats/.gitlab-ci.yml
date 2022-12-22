@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 variables:
   GIT_QUICK_STATS_VERSION: 2.0.9
 
@@ -18,8 +20,7 @@ compile.git-quick-stats:
       - git-quick-stats-${GIT_QUICK_STATS_VERSION}/LICENSE
       - git-quick-stats-${GIT_QUICK_STATS_VERSION}/README.md
 rpm.git-quick-stats:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   variables:
     PACKAGE_NAME: 'git-quick-stats'
     VERSION: $GIT_QUICK_STATS_VERSION
@@ -28,17 +29,7 @@ rpm.git-quick-stats:
   only:
     changes:
       - "git-quick-stats/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
@@ -53,7 +44,6 @@ rpm.git-quick-stats:
       ./git-quick-stats-${GIT_QUICK_STATS_VERSION}/git-quick-stats.1=/usr/share/man/man1/${PACKAGE_NAME}.1
       ./git-quick-stats-${GIT_QUICK_STATS_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
       ./git-quick-stats-${GIT_QUICK_STATS_VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm

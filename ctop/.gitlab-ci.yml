@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 variables:
   CTOP_VERSION: 0.7.3
 
@@ -23,8 +25,7 @@ compile.ctop:
       - ctop/
 
 rpm.ctop:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   variables:
     PACKAGE_NAME: 'ctop'
     VERSION: $CTOP_VERSION
@@ -33,17 +34,7 @@ rpm.ctop:
   only:
     changes:
       - "ctop/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
@@ -56,7 +47,6 @@ rpm.ctop:
       ./ctop/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
       ./ctop/_docs=/usr/share/doc/packages/${PACKAGE_NAME}
       ./ctop/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 variables:
   YUM_SCRIPT_VERSION: 1.1.13
 
@@ -37,8 +39,7 @@ compile.yum-scripts:
       - yum-utils-yum-utils-${YUM_SCRIPT_VERSION}/yum-scripts-build-root
 
 rpm.yum-scripts:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   variables:
     PACKAGE_NAME: 'yum-scripts'
     VERSION: $YUM_SCRIPT_VERSION
@@ -47,17 +48,7 @@ rpm.yum-scripts:
   only:
     changes:
       - "yum-scripts/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
@@ -69,7 +60,6 @@ rpm.yum-scripts:
       -a all
       --conflicts yum-utils
       ./yum-utils-yum-utils-${YUM_SCRIPT_VERSION}/yum-scripts-build-root=/
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm

@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 stages:
   - package
 
@@ -6,28 +8,17 @@ variables:
   SPECFILE: 'python-pipx/python-pipx.spec'
 
 rpm:
-  stage: package
+  extends: .rpm-template
   image:
     name: opensuse/tumbleweed
     entrypoint: [ "/bin/bash", "-c" ]
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - zypper --non-interactive in python-rpm-macros python2-setuptools fdupes rpmdevtools rpm-build python38-devel python38-setuptools python39-devel python39-setuptools python310-devel python310-setuptools
     - mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
     - rpmdev-spectool --all --get-files --directory rpmbuild/SOURCES/ --define 'is_spectool 1' ${SPECFILE}
     - rpmbuild -ba --define="_topdir $PWD/rpmbuild" ${SPECFILE}
     - mv rpmbuild/RPMS/noarch/python*-pipx-*.noarch.rpm .
-    - rpm --addsign *.rpm
   only:
     changes:
       - "python-pipx/*"

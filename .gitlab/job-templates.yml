@@ -1,0 +1,21 @@
+---
+# We cannot use YAML anchors across different YAML files sourced by include.
+# See https://forum.gitlab.com/t/yaml-anchors-for-scripts-do-not-work-properly-with-includes/56169
+# So we use extends keywords.
+# Maybe in future we should migrate to reference tag:
+# https://docs.gitlab.com/ee/ci/yaml/yaml_optimization.html#reference-tags
+.rpm-template:
+  stage: package
+  image: alanfranz/fpm-within-docker:centos-7
+  before_script:
+    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
+    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
+    - |
+      cat > ~/.rpmmacros << EOF
+      %packager Marcin Morawski <marcin@morawskim.pl>
+      %_signature gpg
+      %_gpg_name morawskim Signing Key
+      %vendor morawskim
+      EOF
+  after_script:
+    - rpm --addsign *.rpm

@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 stages:
   - package
 
@@ -7,28 +9,17 @@ variables:
   SPECFILE: 'libXtst/fake-libXtst.spec'
 
 rpm:
-  stage: package
+  extends: .rpm-template
   image:
     name: morawskim/opensuse-leap-debug:15.0.2020-11-13
     entrypoint: [ "/bin/bash", "-c" ]
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - zypper --non-interactive in rpmdevtools rpm-build
     - mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
     - rpmdev-spectool --all --get-files --directory rpmbuild/SOURCES/ ${SPECFILE}
     - rpmbuild -ba --define="_sourcedir $PWD" --define="_topdir $PWD/rpmbuild" ${SPECFILE}
     - mv rpmbuild/RPMS/noarch/fake-libXtst-*.noarch.rpm .
-    - rpm --addsign *.rpm
   only:
     changes:
       - "libXtst/*"

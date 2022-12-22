@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 stages:
   - build
   - package
@@ -22,24 +24,13 @@ compile.duf:
       - ./artefacts/
 
 rpm.duf:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   dependencies:
     - compile.duf
   only:
     changes:
       - "duf/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
@@ -51,7 +42,6 @@ rpm.duf:
       ./artefacts/duf=/usr/bin/
       ./artefacts/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
       ./artefacts/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

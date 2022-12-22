@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 compile.docker-ls:
   stage: build
   image: golang:1.14
@@ -22,8 +24,7 @@ compile.docker-ls:
       - ./bin/docker-rm
 
 rpm.docker-ls:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   variables:
     PACKAGE_NAME: 'docker-ls'
     VERSION: '0.3.2'
@@ -32,17 +33,7 @@ rpm.docker-ls:
   only:
     changes:
       - "docker-ls/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
@@ -53,7 +44,6 @@ rpm.docker-ls:
       --url https://github.com/mayflower/docker-ls
       ./bin/docker-ls=/usr/bin/
       ./bin/docker-rm=/usr/bin/
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

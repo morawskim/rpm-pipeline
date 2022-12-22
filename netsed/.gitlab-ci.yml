@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 variables:
   NETSED_VERSION: '1.2'
 
@@ -23,8 +25,7 @@ compile.netsed:
       - netsed-${NETSED_VERSION}/netsed
 
 rpm.netsed:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   variables:
     PACKAGE_NAME: 'netsed'
     VERSION: $NETSED_VERSION
@@ -33,17 +34,7 @@ rpm.netsed:
   only:
     changes:
       - "netsed/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
@@ -55,7 +46,6 @@ rpm.netsed:
       ./netsed-${NETSED_VERSION}/netsed=/usr/bin/
       ./netsed-${NETSED_VERSION}/html=/usr/share/doc/packages/${PACKAGE_NAME}
       ./netsed-${NETSED_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 variables:
   GRON_VERSION: '0.7.1'
 
@@ -17,8 +19,7 @@ compile.gron:
       - gron-${GRON_VERSION}/
 
 rpm.gron:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   variables:
     PACKAGE_NAME: 'gron'
     VERSION: $GRON_VERSION
@@ -27,17 +28,7 @@ rpm.gron:
   only:
     changes:
       - "gron/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
@@ -51,7 +42,6 @@ rpm.gron:
       ./gron-${GRON_VERSION}/ADVANCED.mkd=/usr/share/doc/packages/${PACKAGE_NAME}/ADVANCED.mkd
       ./gron-${GRON_VERSION}/CHANGELOG.mkd=/usr/share/doc/packages/${PACKAGE_NAME}/CHANGELOG.mkd
       ./gron-${GRON_VERSION}/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-*.x86_64.rpm

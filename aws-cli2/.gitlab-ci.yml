@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
@@ -31,21 +33,10 @@ compile:
       - VERSION
 
 rpm:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   dependencies:
     - compile
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v $(cat VERSION)
       --description 'The AWS Command Line Interface (CLI) is a unified tool to manage AWS services. With this tool, multiple AWS services can be controlled from the command line and automated through scripts.'
@@ -55,7 +46,6 @@ rpm:
       --url https://github.com/aws/aws-cli
       -a all
       ./BUILD_ROOT/=/
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-*-1.noarch.rpm

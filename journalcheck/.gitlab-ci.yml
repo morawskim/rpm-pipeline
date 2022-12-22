@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 variables:
   JOURNALCHECK_VERSION: '20161208'
   JOURNALCHECK_COMMIT: '84b758bc9a77c4a244d768b4e9c8bcb968273b6a'
@@ -27,8 +29,7 @@ compile.journalcheck:
       - journalcheck/
 
 rpm.journalcheck:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   variables:
     PACKAGE_NAME: 'journalcheck'
     VERSION: $JOURNALCHECK_VERSION
@@ -37,17 +38,7 @@ rpm.journalcheck:
   only:
     changes:
       - "journalcheck/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - cat ~/.rpmmacros
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
@@ -60,7 +51,6 @@ rpm.journalcheck:
       ./journalcheck/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/README.md
       ./journalcheck/example=/usr/share/doc/packages/${PACKAGE_NAME}/
       ./journalcheck/LICENSE=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

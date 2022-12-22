@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 stages:
   - build
   - package
@@ -24,24 +26,13 @@ compile:
       - xsv-${VERSION}/README.md
 
 rpm:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   dependencies:
     - compile
   only:
     changes:
       - "xsv/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
       --description 'xsv is a command line program for indexing, slicing, analyzing, splitting and joining CSV files. Commands should be simple, fast and composable.'
@@ -52,7 +43,6 @@ rpm:
       xsv-${VERSION}/target/release/xsv=/usr/bin/
       xsv-${VERSION}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
       xsv-${VERSION}/LICENSE-MIT=/usr/share/licenses/${PACKAGE_NAME}/
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-${VERSION}-1.x86_64.rpm

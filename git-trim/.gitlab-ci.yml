@@ -1,3 +1,5 @@
+include: '/.gitlab/job-templates.yml'
+
 stages:
   - build
   - package
@@ -23,24 +25,13 @@ compile:
       - git-trim-${COMMIT}/README.md
 
 rpm:
-  stage: package
-  image: alanfranz/fpm-within-docker:centos-7
+  extends: .rpm-template
   dependencies:
     - compile
   only:
     changes:
       - "git-trim/*"
-  before_script:
-    - gpg --import $GPG_PRIVATE_KEY_TO_SIGN
-    - echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --edit-key "morawskim" trust
   script:
-    - |
-      cat > ~/.rpmmacros << EOF
-      %packager Marcin Morawski <marcin@morawskim.pl>
-      %_signature gpg
-      %_gpg_name morawskim Signing Key
-      %vendor morawskim
-      EOF
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
       --description 'A command to quickly remove merged, pruned, untracked, or stale branches within a repository.'
@@ -52,7 +43,6 @@ rpm:
       git-trim-${COMMIT}/git-trim=/usr/bin/
       git-trim-${COMMIT}/README.md=/usr/share/doc/packages/${PACKAGE_NAME}/
       git-trim-${COMMIT}/LICENSE.md=/usr/share/licenses/${PACKAGE_NAME}/
-    - rpm --addsign *.rpm
   artifacts:
     paths:
       - ${PACKAGE_NAME}-${VERSION}-1.noarch.rpm
