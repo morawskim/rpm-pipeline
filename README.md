@@ -74,3 +74,5 @@ and  available at [http://rpm.morawskim.pl/openSUSE_Factory/](http://rpm.morawsk
 `aws` - [aws](https://github.com/aws/aws-cli) Amazon Web Services Command Line Interface v2
 
 `kube-prompt` - [kube-prompt](https://github.com/c-bata/kube-prompt) An interactive kubernetes client featuring auto-complete.
+
+`teller` - [teller](https://github.com/tellerops/teller) Cloud native secrets management for developers - never leave your command line for secrets.

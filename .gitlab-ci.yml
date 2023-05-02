@@ -265,3 +265,16 @@ kube-prompt_pipeline:
   trigger:
     include:
       - local: kube-prompt/.gitlab-ci.yml
+
+teller_pipeline:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - teller/*
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: manual
+      allow_failure: true
+  trigger:
+    include:
+      - local: teller/.gitlab-ci.yml

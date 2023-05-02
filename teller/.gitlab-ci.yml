@@ -1,0 +1,47 @@
+include: '/.gitlab/job-templates.yml'
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - teller/*
+    - if: $CI_PIPELINE_SOURCE == "parent_pipeline"
+      when: always
+
+stages:
+  - build
+  - package
+
+variables:
+  PACKAGE_NAME: 'teller'
+  PACKAGE_VERSION: 1.5.6
+
+compile:
+  stage: build
+  image: rust:1.66
+  script:
+    - curl -L "https://github.com/tellerops/teller/releases/download/v${PACKAGE_VERSION}/teller_${PACKAGE_VERSION}_Linux_x86_64.tar.gz" -o "teller.tar.gz"
+    - mkdir -p BUILD_ROOT/
+    - tar xvzf teller.tar.gz -C BUILD_ROOT/
+  artifacts:
+    paths:
+      - BUILD_ROOT
+
+rpm:
+  extends: .rpm-template
+  dependencies:
+    - compile
+  script:
+    - >
+      fpm -s dir -t rpm -n ${PACKAGE_NAME} -v $PACKAGE_VERSION
+      --description 'Cloud native secrets management for developers - never leave your command line for secrets.'
+      --rpm-summary 'the open-source universal secret manager for developers'
+      --vendor morawskim
+      --license Apache-2.0
+      --url https://github.com/tellerops/teller
+      ./BUILD_ROOT/teller=/usr/bin/
+      ./BUILD_ROOT/LICENSE.txt=/usr/share/licenses/${PACKAGE_NAME}/LICENSE
+      ./BUILD_ROOT/README.md=/usr/share/doc/packages/${PACKAGE_NAME}
+  artifacts:
+    paths:
+      - ${PACKAGE_NAME}-*-1.x86_64.rpm
