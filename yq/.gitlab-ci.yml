@@ -6,11 +6,11 @@ stages:
 
 variables:
   PACKAGE_NAME: 'yq'
-  VERSION: '4.5.1'
+  VERSION: '4.32.2'
 
 compile:
   stage: build
-  image: golang:1.14
+  image: golang:1.20
   script:
     - wget -Oyq.tar.gz https://github.com/mikefarah/yq/archive/v${VERSION}.tar.gz
     - tar xvzf yq.tar.gz
@@ -35,8 +35,8 @@ rpm:
   script:
     - >
       fpm -s dir -t rpm -n ${PACKAGE_NAME} -v ${VERSION}
-      --description 'a lightweight and portable command-line YAML processor. yq uses jq like syntax but works with yaml files as well as json. It does not yet support everything jq does - but it does support the most common operations and functions, and more is being added continuously.'
-      --rpm-summary 'yq is a portable command-line YAML processor'
+      --description 'a lightweight and portable command-line YAML, JSON and XML processor. yq uses jq like syntax but works with yaml files as well as json, xml, properties, csv and tsv. It doesn't yet support everything jq does - but it does support the most common operations and functions, and more is being added continuously.'
+      --rpm-summary 'yq is a portable command-line YAML, JSON, XML, CSV, TOML and properties processor'
       --vendor morawskim
       --license MIT
       --url https://github.com/mikefarah/yq
