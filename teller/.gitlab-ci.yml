@@ -20,9 +20,11 @@ compile:
   stage: build
   image: rust:1.66
   script:
-    - curl -L "https://github.com/tellerops/teller/releases/download/v${PACKAGE_VERSION}/teller-x86_64-linux.tar.xz" -o "teller.tar.gz"
+    - curl -L "https://github.com/tellerops/teller/releases/download/v${PACKAGE_VERSION}/teller-x86_64-linux.tar.xz" -o "teller.tar.xz"
     - mkdir -p BUILD_ROOT/
-    - tar xvJf teller.tar.gz -C BUILD_ROOT/
+    - tar xvJf teller.tar.xz -C BUILD_ROOT/ --strip-components=1
+    - curl -o BUILD_ROOT/LICENSE.txt https://raw.githubusercontent.com/tellerops/teller/v${PACKAGE_VERSION}/LICENSE.txt
+    - curl -o BUILD_ROOT/README.md https://raw.githubusercontent.com/tellerops/teller/v${PACKAGE_VERSION}/README.md
   artifacts:
     paths:
       - BUILD_ROOT
